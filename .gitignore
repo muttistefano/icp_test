@@ -1,0 +1,8 @@
+log/
+.vscode/
+scripts/ppew/
+scripts/transfer/laser.npy
+scripts/transfer/laser_fine.npy
+scripts/transfer/tf.npy
+scripts/transfer/tf_fine.npy
+scripts/transfer/ppew

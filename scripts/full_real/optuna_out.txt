@@ -1,0 +1,6 @@
+  Value: 0.02147773475874038
+    n_layers: 2 
+    n_hidden: 10 
+    dropout: 0.2 
+    lr: 0.0048799965215551005 
+    optimizer: AdamW 
