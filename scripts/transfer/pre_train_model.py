@@ -10,13 +10,14 @@ from natsort import natsorted
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-import time
+from datetime import datetime
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
 from torch.utils.tensorboard import SummaryWriter
 from torch import dropout, float32, from_numpy, flatten, no_grad
 from torch.autograd import Variable
 
+pptime = datetime.now().strftime("%d_%m_%Y_%H_%M")
 
 np.set_printoptions(threshold=np.inf)
 np.set_printoptions(suppress=True)
@@ -124,7 +125,7 @@ for epoch in range(epochs):
 
     running_loss = running_loss/float(len(train_loader))
     print(epoch,": ",epochs)
-    writer.add_scalars("loss", {
+    writer.add_scalars(pptime, {
                         'train': running_loss,
     }, epoch)
 
@@ -138,15 +139,15 @@ for epoch in range(epochs):
 
             running_loss_valid += loss.item()
         # for lbb,ott in zip(labels,outputs):
-        writer.add_scalars("x", {
+        writer.add_scalars(pptime, {
             'label_x': labels[0,0].item(),
             'out_x': outputs[0][0].item(),
         }, cntw)
-        writer.add_scalars("y", {
+        writer.add_scalars(pptime, {
             'label_y': labels[0,1].item(),
             'out_y': outputs[0][1].item(),
         }, cntw)
-        writer.add_scalars("W", {
+        writer.add_scalars(pptime, {
             'label_w': labels[0,2].item(),
             'out_w': outputs[0][2].item(),
         }, cntw)
@@ -154,7 +155,7 @@ for epoch in range(epochs):
 
         running_loss_valid = running_loss_valid/float(len(test_loader))
         loss_valid.append(running_loss_valid)
-        writer.add_scalars("loss", {
+        writer.add_scalars(pptime, {
                         'valid': running_loss_valid,
         }, epoch)
         writer.flush()
