@@ -125,7 +125,7 @@ for epoch in range(epochs):
 
     running_loss = running_loss/float(len(train_loader))
     print(epoch,": ",epochs)
-    writer.add_scalars(pptime, {
+    writer.add_scalars("loss", {
                         'train': running_loss,
     }, epoch)
 
@@ -139,15 +139,15 @@ for epoch in range(epochs):
 
             running_loss_valid += loss.item()
         # for lbb,ott in zip(labels,outputs):
-        writer.add_scalars(pptime, {
+        writer.add_scalars("x", {
             'label_x': labels[0,0].item(),
             'out_x': outputs[0][0].item(),
         }, cntw)
-        writer.add_scalars(pptime, {
+        writer.add_scalars("y", {
             'label_y': labels[0,1].item(),
             'out_y': outputs[0][1].item(),
         }, cntw)
-        writer.add_scalars(pptime, {
+        writer.add_scalars("W", {
             'label_w': labels[0,2].item(),
             'out_w': outputs[0][2].item(),
         }, cntw)
@@ -155,7 +155,7 @@ for epoch in range(epochs):
 
         running_loss_valid = running_loss_valid/float(len(test_loader))
         loss_valid.append(running_loss_valid)
-        writer.add_scalars(pptime, {
+        writer.add_scalars("loss", {
                         'valid': running_loss_valid,
         }, epoch)
         writer.flush()
