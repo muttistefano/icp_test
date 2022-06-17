@@ -152,15 +152,15 @@ for epoch in range(epochs):
         # for lbb,ott in zip(labels,outputs):
         writer.add_scalars("x", {
             'label_x': labels[0,0].item(),
-            'out_x': outputs[0][0].item(),
+            'out_x': (outputs[0][0].item()*0.3416164) + 0.00555812,
         }, cntw)
         writer.add_scalars("y", {
             'label_y': labels[0,1].item(),
-            'out_y': outputs[0][1].item(),
+            'out_y': (outputs[0][1].item()*0.3416164) + 0.00555812,
         }, cntw)
         writer.add_scalars("W", {
             'label_w': labels[0,2].item(),
-            'out_w': outputs[0][2].item(),
+            'out_w': (outputs[0][2].item()*0.3416164) + 0.00555812,
         }, cntw)
         cntw = cntw + 1
 
