@@ -177,7 +177,7 @@ print(tf_tot.nbytes * 1e-6)
 # print("lasers mean and std: " + str(laser_tot.mean()) + " " + str(laser_tot.std()))
 # print("tf     mean and std: " + str(tf_tot.mean())    + " " + str(tf_tot.std()))
 
-laser_array = (laser_tot - laser_tot.mean())/(laser_tot.std())
+# laser_array = (laser_tot - laser_tot.mean())/(laser_tot.std())
 # laser_array = (laser_tot - 1.1850791)/(1.1398817)
 # tf_tot      = (tf_tot    -0.00555812)/(0.3416164)
 

@@ -1,1 +1,2 @@
-maybe collision in data set ?? collect a new one and check
+controlla se hai collisioni nella simulazione
+non standardizzare, normalizza solo e controlla se in RNN ci va il batchnorm

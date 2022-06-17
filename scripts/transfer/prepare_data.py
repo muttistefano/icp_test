@@ -246,13 +246,13 @@ print(len(laser_tot))
 print(laser_tot.nbytes * 1e-6)
 print(tf_tot.nbytes * 1e-6)
 
-print("lasers mean and std: " + str(laser_tot.mean()) + " " + str(laser_tot.std()))
-print("tf     mean and std: " + str(tf_tot.mean())    + " " + str(tf_tot.std()))
+# print("lasers mean and std: " + str(laser_tot.mean()) + " " + str(laser_tot.std()))
+# print("tf     mean and std: " + str(tf_tot.mean())    + " " + str(tf_tot.std()))
+# laser_tot = (laser_tot - laser_tot.mean())/(laser_tot.std())
+# tf_tot      = (tf_tot - tf_tot.mean())/(tf_tot.std())
 
-laser_array = (laser_tot - laser_tot.mean())/(laser_tot.std())
-tf_tot      = (tf_tot - tf_tot.mean())/(tf_tot.std())
-
-
+print("laser max : " + str(laser_tot.max()))
+laser_tot /= laser_tot.max()
 
 np.save("laser",laser_tot)
 np.save("tf",tf_tot)
