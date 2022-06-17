@@ -152,6 +152,7 @@ else:
 ranges_data_array = ranges_data_array[:,:,718:1228]
 
 ranges_data_array[ranges_data_array == np.inf] = 0
+ranges_data_array[ranges_data_array > 3] = 0
 
 print(ranges_data_array.shape)
 print(april_tf_1.shape)

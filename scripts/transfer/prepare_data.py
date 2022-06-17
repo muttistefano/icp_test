@@ -215,6 +215,13 @@ laser_array_4[laser_array_4 == np.inf] = 0
 laser_array_5[laser_array_5 == np.inf] = 0
 laser_array_6[laser_array_6 == np.inf] = 0
 
+laser_array_1[laser_array_1 > 3] = 0
+laser_array_2[laser_array_2 > 3] = 0
+laser_array_3[laser_array_3 > 3] = 0
+laser_array_4[laser_array_4 > 3] = 0
+laser_array_5[laser_array_5 > 3] = 0
+laser_array_6[laser_array_6 > 3] = 0
+
 
 print(tf_array_1.shape)
 print(laser_array_1.shape)
@@ -252,7 +259,7 @@ print(tf_tot.nbytes * 1e-6)
 # tf_tot      = (tf_tot - tf_tot.mean())/(tf_tot.std())
 
 print("laser max : " + str(laser_tot.max()))
-laser_tot /= laser_tot.max()
+# laser_tot /= laser_tot.max()
 
 np.save("laser",laser_tot)
 np.save("tf",tf_tot)
