@@ -74,8 +74,9 @@ class RNN(nn.Module):
         # self.bn  = nn.BatchNorm1d(hidden_size)
         self.rl  = nn.ReLU()
         # self.drp = nn.Dropout(0.1)
-        self.fc = nn.Linear(in_features=hidden_size,out_features=50)
-        self.fc2 = nn.Linear(in_features=50,out_features=3)
+        self.fc = nn.Linear(in_features=hidden_size,out_features=150)
+        self.fc2 = nn.Linear(in_features=150,out_features=50)
+        self.fc3 = nn.Linear(in_features=50,out_features=3)
 
 
     def forward(self,x):
@@ -89,6 +90,8 @@ class RNN(nn.Module):
         out    = self.fc(out)
         out    = self.rl(out)
         out    = self.fc2(out)
+        out    = self.rl(out)
+        out    = self.fc3(out)
         return out
 
 
