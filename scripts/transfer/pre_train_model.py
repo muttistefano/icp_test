@@ -100,9 +100,9 @@ model.to(device)
 criterion = torch.nn.MSELoss(reduction="mean")
 
 
-optimizer = torch.optim.AdamW(model.parameters(),lr=0.00005)
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.00002)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
-epochs    = 2000
+epochs    = 4000
 cntw = 0
 
 loss_valid = []
