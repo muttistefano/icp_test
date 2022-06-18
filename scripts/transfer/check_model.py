@@ -20,8 +20,8 @@ from torch.autograd import Variable
 
 writer = SummaryWriter('ppew')
 
-laser_array = np.load("laser_fine.npy")
-tf_array    = np.load("tf_fine.npy")
+laser_array = np.load("laser_test.npy")
+tf_array    = np.load("tf_test.npy")
 
 
 print("GPU avail : ",torch.cuda.is_available())
@@ -57,7 +57,7 @@ class RNN(nn.Module):
 
 
 model = RNN(150,3)
-model.load_state_dict(torch.load("model_norm.net"))
+model.load_state_dict(torch.load("model.net"))
 model.eval()
 
 model.float()
@@ -74,15 +74,15 @@ with no_grad():
 
         writer.add_scalars("x", {
             'label_x': labels[0].item(),
-            'out_x': (outputs[0][0].item()*0.3416164) + 0.00555812,
+            'out_x': outputs[0][0].item(),
         }, i)
         writer.add_scalars("y", {
             'label_y': labels[1].item(),
-            'out_y': (outputs[0][1].item()*0.3416164) + 0.00555812,
+            'out_y': outputs[0][1].item(),
         }, i)
         writer.add_scalars("W", {
             'label_w': labels[2].item(),
-            'out_w': (outputs[0][2].item()*0.3416164) + 0.00555812,
+            'out_w': outputs[0][2].item(),
         }, i)
 
         writer.flush()
