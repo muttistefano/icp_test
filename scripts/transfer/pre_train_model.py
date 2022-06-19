@@ -82,10 +82,10 @@ class RNN(nn.Module):
         c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         # print(x.shape)
         out, _ = self.lstm(x,h0)
-        out    = self.fc(F.ReLU(out[:, -1, :]))
-        out    = self.fc2(F.ReLU(out))
-        out    = self.fc3(F.ReLU(out))
-        out    = self.fc4(F.ReLU(out))
+        out    = self.fc(F.relu(out[:, -1, :]))
+        out    = self.fc2(F.relu(out))
+        out    = self.fc3(F.relu(out))
+        out    = self.fc4(F.relu(out))
 
         return out
 
