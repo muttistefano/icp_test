@@ -95,10 +95,11 @@ model = RNN(250,3)
 model.float()
 model.to(device)
 
-criterion = torch.nn.MSELoss(reduction="mean")
+# criterion = torch.nn.MSELoss()
+criterion = torch.nn.L1Loss()
 
 
-optimizer = torch.optim.AdamW(model.parameters(),lr=0.001)
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.0001)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
 epochs    = 4000
 cntw = 0
