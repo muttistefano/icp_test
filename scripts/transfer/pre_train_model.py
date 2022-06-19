@@ -71,12 +71,10 @@ class RNN(nn.Module):
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.lstm = nn.GRU(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
-        # self.bn  = nn.BatchNorm1d(hidden_size)
-        self.rl  = nn.ReLU()
-        # self.drp = nn.Dropout(0.1)
-        self.fc = nn.Linear(in_features=hidden_size,out_features=150)
-        self.fc2 = nn.Linear(in_features=150,out_features=50)
-        self.fc3 = nn.Linear(in_features=50,out_features=3)
+        self.fc   = nn.Linear(in_features=hidden_size,out_features=350)
+        self.fc2  = nn.Linear(in_features=350,out_features=150)
+        self.fc3  = nn.Linear(in_features=150,out_features=50)
+        self.fc4  = nn.Linear(in_features=50,out_features=3)
 
 
     def forward(self,x):
@@ -84,18 +82,15 @@ class RNN(nn.Module):
         c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         # print(x.shape)
         out, _ = self.lstm(x,h0)
-        # out    = self.bn(out[:, -1, :])
-        # out    = self.rl(out)
-        out    = self.rl(out[:, -1, :])
-        out    = self.fc(out)
-        out    = self.rl(out)
-        out    = self.fc2(out)
-        out    = self.rl(out)
-        out    = self.fc3(out)
+        out    = self.fc(nn.ReLU(out[:, -1, :]))
+        out    = self.fc2(nn.ReLU(out))
+        out    = self.fc3(nn.ReLU(out))
+        out    = self.fc4(nn.ReLU(out))
+
         return out
 
 
-model = RNN(150,3)
+model = RNN(250,3)
 
 model.float()
 model.to(device)
@@ -103,7 +98,7 @@ model.to(device)
 criterion = torch.nn.MSELoss(reduction="mean")
 
 
-optimizer = torch.optim.AdamW(model.parameters(),lr=0.00002)
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.001)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
 epochs    = 4000
 cntw = 0
