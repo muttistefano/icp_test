@@ -54,14 +54,16 @@ class CustomDataset(Dataset):
 set_complete = CustomDataset(laser_array.astype(np.float32),tf_array)
 
 
-train_size = int(len(set_complete) * 0.8)
-test_size  = len(set_complete)  - train_size
-train_set, test_set = random_split(set_complete, [train_size,test_size ])
+train_size = int(len(set_complete) * 0.75)
+valid_size = int(len(set_complete) * 0.15)
+test_size  = len(set_complete)  - train_size - valid_size
+train_set, valid_set, test_set = random_split(set_complete, [train_size,valid_size,test_size ])
 
 
 batch_size_train = 8192
 
 train_loader = DataLoader(train_set, batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+valid_loader = DataLoader(valid_set , batch_size=8192             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 test_loader  = DataLoader(test_set , batch_size=8192             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 
 
@@ -131,14 +133,12 @@ for epoch in range(epochs):
 
     model.eval()
     with no_grad():
-        for i, data in enumerate(test_loader, 0):
-            # inputs, labels = data[0].to(device), data[1].to(device)
+        for i, data in enumerate(valid_loader, 0):
             inputs, labels = data[0], data[1]
             outputs = model(inputs)
             loss = criterion(outputs, labels)
 
             running_loss_valid += loss.item()
-        # for lbb,ott in zip(labels,outputs):
         writer.add_scalars("x", {
             'label_x': labels[0,0].item(),
             'out_x': outputs[0][0].item(),
@@ -153,12 +153,41 @@ for epoch in range(epochs):
         }, cntw)
         cntw = cntw + 1
 
-        running_loss_valid = running_loss_valid/float(len(test_loader))
+        running_loss_valid = running_loss_valid/float(len(valid_loader))
         loss_valid.append(running_loss_valid)
         writer.add_scalars("loss", {
                         'valid': running_loss_valid,
         }, epoch)
         writer.flush()
+
+model.eval()
+with no_grad():
+    for i, data in enumerate(test_loader, 0):
+        inputs, labels = data[0], data[1]
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+
+        running_loss_valid += loss.item()
+    writer.add_scalars("x", {
+        'test_label_x': labels[0,0].item(),
+        'test_out_x': outputs[0][0].item(),
+    }, cntw)
+    writer.add_scalars("y", {
+        'test_label_y': labels[0,1].item(),
+        'test_out_y': outputs[0][1].item(),
+    }, cntw)
+    writer.add_scalars("W", {
+        'test_label_w': labels[0,2].item(),
+        'test_out_w': outputs[0][2].item(),
+    }, cntw)
+    cntw = cntw + 1
+
+    running_loss_valid = running_loss_valid/float(len(test_loader))
+    loss_valid.append(running_loss_valid)
+    writer.add_scalars("test_loss", {
+                    'test_valid': running_loss_valid,
+    }, epoch)
+    writer.flush()
 
 # np.save("out/gru_l1_adamw_00002_1500_loss.net",np.asarray(loss_valid))
 torch.save(model.state_dict(), "model.net")
