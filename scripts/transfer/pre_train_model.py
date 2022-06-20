@@ -47,7 +47,7 @@ class CustomDataset(Dataset):
         return len(self.tf_label) - 1
 
     def __getitem__(self, idx):
-        return self.laser[idx].transpose(0,1), self.tf_label[idx]
+        return self.laser[idx], self.tf_label[idx]
 
 
 
@@ -70,7 +70,7 @@ class RNN(nn.Module):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.rnn = nn.RNN(input_size=20,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
+        self.rnn = nn.RNN(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
         self.fc   = nn.Linear(in_features=hidden_size,out_features=100)
         self.fc2  = nn.Linear(in_features=100,out_features=3)
         # self.fc3  = nn.Linear(in_features=50,out_features=50)
