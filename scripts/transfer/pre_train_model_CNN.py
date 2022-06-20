@@ -68,12 +68,13 @@ test_loader  = DataLoader(test_set , batch_size=256             ,shuffle=True, n
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
-        self.cnn1 = nn.Conv2d(1,10,kernel_size=20,stride=10,padding=0)
+        self.cnn1 = nn.Conv2d(1,10,kernel_size=20,stride=5,padding=0)
         self.bn1  = nn.BatchNorm2d(10)
         # self.cnn2 = nn.Conv2d(10,20,kernel_size=10,stride=10,padding=0)
         # self.bn2  = nn.BatchNorm2d(20)
-        self.fc   = nn.Linear(in_features=500,out_features=100)
-        self.fc2  = nn.Linear(in_features=100,out_features=3)
+        self.fc   = nn.Linear(in_features=1000,out_features=400)
+        self.fc2  = nn.Linear(in_features=400,out_features=100)
+        self.fc3  = nn.Linear(in_features=1,out_features=3)
         # self.fc3  = nn.Linear(in_features=50,out_features=50)
         # self.fc4  = nn.Linear(in_features=50,out_features=3)
 
@@ -85,6 +86,7 @@ class CNN(nn.Module):
         # out = self.cnn2(out)
         out = self.fc(F.relu(out))
         out = self.fc2(F.relu(out))
+        out = self.fc3(F.relu(out))
         # out    = self.fc3(F.relu(out))
         # out    = self.fc4(F.relu(out))
 
