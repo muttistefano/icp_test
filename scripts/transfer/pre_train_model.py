@@ -70,7 +70,7 @@ class RNN(nn.Module):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.lstm = nn.GRU(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
+        self.rnn = nn.GRU(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
         self.fc   = nn.Linear(in_features=hidden_size,out_features=50)
         self.fc2  = nn.Linear(in_features=50,out_features=50)
         self.fc3  = nn.Linear(in_features=50,out_features=50)
@@ -82,7 +82,7 @@ class RNN(nn.Module):
         c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         # print(x.shape)
         # out, _ = self.lstm(x,h0)
-        ula, (out, _) = self.lstm(x, (h0, c0))
+        out, _ = self.rnn(x, (h0, c0))
         out    = self.fc(F.relu(out[:, -1, :]))
         out    = self.fc2(F.relu(out))
         out    = self.fc3(F.relu(out))
