@@ -72,9 +72,9 @@ class RNN(nn.Module):
         self.num_layers = num_layers
         self.rnn = nn.GRU(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
         self.fc   = nn.Linear(in_features=hidden_size,out_features=50)
-        self.fc2  = nn.Linear(in_features=50,out_features=50)
-        self.fc3  = nn.Linear(in_features=50,out_features=50)
-        self.fc4  = nn.Linear(in_features=50,out_features=3)
+        self.fc2  = nn.Linear(in_features=50,out_features=3)
+        # self.fc3  = nn.Linear(in_features=50,out_features=50)
+        # self.fc4  = nn.Linear(in_features=50,out_features=3)
 
 
     def forward(self,x):
@@ -85,8 +85,8 @@ class RNN(nn.Module):
         # out, _ = self.rnn(x, (h0, c0))
         out    = self.fc(F.relu(out[:, -1, :]))
         out    = self.fc2(F.relu(out))
-        out    = self.fc3(F.relu(out))
-        out    = self.fc4(F.relu(out))
+        # out    = self.fc3(F.relu(out))
+        # out    = self.fc4(F.relu(out))
 
         return out
 
