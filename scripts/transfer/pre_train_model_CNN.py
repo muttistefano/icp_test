@@ -68,11 +68,11 @@ test_loader  = DataLoader(test_set , batch_size=256             ,shuffle=True, n
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
-        self.cnn1 = nn.Conv2d(1,10,kernel_size=20,stride=5,padding=0)
+        self.cnn1 = nn.Conv2d(1,10,kernel_size=10,stride=5,padding=0)
         self.bn1  = nn.BatchNorm2d(10)
-        # self.cnn2 = nn.Conv2d(10,20,kernel_size=10,stride=10,padding=0)
-        # self.bn2  = nn.BatchNorm2d(20)
-        self.fc   = nn.Linear(in_features=990,out_features=400)
+        self.cnn2 = nn.Conv2d(1,20,kernel_size=10,stride=10,padding=0)
+        self.bn2  = nn.BatchNorm2d(20)
+        self.fc   = nn.Linear(in_features=2040,out_features=400)
         self.fc2  = nn.Linear(in_features=400,out_features=100)
         self.fc3  = nn.Linear(in_features=100,out_features=3)
         # self.fc3  = nn.Linear(in_features=50,out_features=50)
@@ -80,8 +80,13 @@ class CNN(nn.Module):
 
 
     def forward(self,x):
+        # print(x.shape)
         out = self.cnn1(x)
+        # print(out.shape)
         out = self.bn1(out)
+        out = self.cnn2(x)
+        # print(out.shape)
+        out = self.bn2(out)
         out = torch.flatten(out,1)
         # out = self.cnn2(out)
         # print(out.shape)
