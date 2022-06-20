@@ -240,6 +240,7 @@ for las,tf in zip([laser_array_1,laser_array_2,laser_array_3,laser_array_4,laser
                   [tf_array_1,tf_array_2,tf_array_3,tf_array_4,tf_array_5,tf_array_6] ):
     for cnt,(las_s,tf_s) in enumerate(zip(las,tf)):
         rnd_idx_all = np.random.randint(max(0,cnt-20),min(len(las),cnt+20),size=(20))
+        # rnd_idx_all = np.random.randint(max(0,cnt-20),min(len(las),cnt+20),size=(1))
         rnd_idx = np.setdiff1d(rnd_idx_all,cnt)
         for elem in rnd_idx:
             laser_tot.append(np.concatenate((las_s,las[elem])))
