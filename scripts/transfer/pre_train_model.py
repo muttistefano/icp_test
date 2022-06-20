@@ -37,7 +37,7 @@ print("DEvice: ",device)
 
 class CustomDataset(Dataset):
     def __init__(self, laser_in,tf_label_in, transform_in=None, target_transform_in=None):
-        self.laser              = torch.tensor(laser_in,dtype=torch.float32).to(device)
+        self.laser              = torch.tensor(laser_in,dtype=torch.float32).transpose().to(device)
         self.tf_label           = torch.tensor(tf_label_in,dtype=torch.float32).to(device)
         self.transform          = transform_in
         self.target_transform   = target_transform_in
@@ -70,7 +70,7 @@ class RNN(nn.Module):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.rnn = nn.GRU(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
+        self.rnn = nn.GRU(input_size=20,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
         self.fc   = nn.Linear(in_features=hidden_size,out_features=50)
         self.fc2  = nn.Linear(in_features=50,out_features=3)
         # self.fc3  = nn.Linear(in_features=50,out_features=50)
