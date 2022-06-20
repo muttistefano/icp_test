@@ -81,7 +81,7 @@ class RNN(nn.Module):
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device) 
         # c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         # print(x.shape)
-        out, _ = self.lstm(x,h0)
+        out, _ = self.rnn(x,h0)
         # out, _ = self.rnn(x, (h0, c0))
         out    = self.fc(F.relu(out[:, -1, :]))
         out    = self.fc2(F.relu(out))
