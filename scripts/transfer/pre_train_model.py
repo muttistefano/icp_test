@@ -68,9 +68,10 @@ test_loader  = DataLoader(test_set , batch_size=256             ,shuffle=True, n
 class RNN(nn.Module):
     def __init__(self, hidden_size, num_layers):
         super(RNN, self).__init__()
+        self.h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device) 
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.rnn = nn.GRU(input_size=20,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
+        self.rnn = nn.RNN(input_size=20,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
         self.fc   = nn.Linear(in_features=hidden_size,out_features=100)
         self.fc2  = nn.Linear(in_features=100,out_features=3)
         # self.fc3  = nn.Linear(in_features=50,out_features=50)
@@ -78,10 +79,10 @@ class RNN(nn.Module):
 
 
     def forward(self,x):
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device) 
+        self.h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device) 
         # c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         # print(x.shape)
-        out, _ = self.rnn(x,h0)
+        out, _ = self.rnn(x,self.h0)
         # out, _ = self.rnn(x, (h0, c0))
         out    = self.fc(F.relu(out[:, -1, :]))
         out    = self.fc2(F.relu(out))
