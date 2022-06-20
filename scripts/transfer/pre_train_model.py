@@ -59,10 +59,10 @@ test_size  = len(set_complete)  - train_size
 train_set, test_set = random_split(set_complete, [train_size,test_size ])
 
 
-batch_size_train = 256
+batch_size_train = 8192
 
 train_loader = DataLoader(train_set, batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-test_loader  = DataLoader(test_set , batch_size=256             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+test_loader  = DataLoader(test_set , batch_size=8192             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 
 
 class RNN(nn.Module):
