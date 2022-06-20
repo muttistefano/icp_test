@@ -78,6 +78,7 @@ class RNN(nn.Module):
 
 
     def forward(self,x):
+        print(x.shape)
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device) 
         # c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         # print(x.shape)
