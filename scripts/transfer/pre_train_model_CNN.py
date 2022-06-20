@@ -84,7 +84,7 @@ class CNN(nn.Module):
         out = self.bn1(out)
         out = torch.flatten(out,1)
         # out = self.cnn2(out)
-        print(out.shape)
+        # print(out.shape)
         out = self.fc(F.relu(out))
         out = self.fc2(F.relu(out))
         out = self.fc3(F.relu(out))
