@@ -91,7 +91,7 @@ class RNN(nn.Module):
         return out
 
 
-model = RNN(50,3)
+model = RNN(30,1)
 
 model.float()
 model.to(device)
