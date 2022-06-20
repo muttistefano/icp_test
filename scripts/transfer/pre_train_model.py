@@ -71,8 +71,8 @@ class RNN(nn.Module):
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.rnn = nn.GRU(input_size=20,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
-        self.fc   = nn.Linear(in_features=hidden_size,out_features=150)
-        self.fc2  = nn.Linear(in_features=150,out_features=3)
+        self.fc   = nn.Linear(in_features=hidden_size,out_features=100)
+        self.fc2  = nn.Linear(in_features=100,out_features=3)
         # self.fc3  = nn.Linear(in_features=50,out_features=50)
         # self.fc4  = nn.Linear(in_features=50,out_features=3)
 
