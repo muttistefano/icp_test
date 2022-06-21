@@ -258,15 +258,17 @@ print(tf_tot.nbytes * 1e-6)
 # print("tf     mean and std: " + str(tf_tot.mean())    + " " + str(tf_tot.std()))
 # laser_tot = (laser_tot - laser_tot.mean())/(laser_tot.std())
 # tf_tot      = (tf_tot - tf_tot.mean())/(tf_tot.std())
+tf_min_max = np.array([tf_tot[:,0].min(),tf_tot[:,0].max(),tf_tot[:,1].min(),tf_tot[:,1].max(),tf_tot[:,2].min(),tf_tot[:,2].max()])
 print("tf     min and max: " + str(tf_tot[:,0].min())    + " " + str(tf_tot[:,0].max()))
 print("tf     min and max: " + str(tf_tot[:,1].min())    + " " + str(tf_tot[:,1].max()))
 print("tf     min and max: " + str(tf_tot[:,2].min())    + " " + str(tf_tot[:,2].max()))
 tf_tot[:,0] = (tf_tot[:,0] - tf_tot[:,0].min()) / (tf_tot[:,0].max() - tf_tot[:,0].min())
 tf_tot[:,1] = (tf_tot[:,1] - tf_tot[:,1].min()) / (tf_tot[:,1].max() - tf_tot[:,1].min())
 tf_tot[:,2] = (tf_tot[:,2] - tf_tot[:,2].min()) / (tf_tot[:,2].max() - tf_tot[:,2].min())
+
 # print("laser max : " + str(laser_tot.max()))
 # laser_tot /= laser_tot.max()
-
+np.save("tf_min_max",tf_min_max)
 np.save("laser",laser_tot)
 np.save("tf",tf_tot)
 

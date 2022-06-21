@@ -83,12 +83,12 @@ class RNN(nn.Module):
     def forward(self,x):
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device) 
         out_rnn, _ = self.rnn(x,h0)
-        outx     = self.fcx(F.relu(out_rnn[:, -1, :]))
-        outx     = self.fcx2(F.relu(outx))
-        outy     = self.fcy(F.relu(out_rnn[:, -1, :]))
-        outy     = self.fcy2(F.relu(outy))
-        outw     = self.fcw(F.relu(out_rnn[:, -1, :]))
-        outw     = self.fcw2(F.relu(outw))
+        outx       = self.fcx(F.relu(out_rnn[:, -1, :]))
+        outx       = self.fcx2(F.relu(outx))
+        outy       = self.fcy(F.relu(out_rnn[:, -1, :]))
+        outy       = self.fcy2(F.relu(outy))
+        outw       = self.fcw(F.relu(out_rnn[:, -1, :]))
+        outw       = self.fcw2(F.relu(outw))
 
         return outx,outy,outw
 
