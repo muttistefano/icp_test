@@ -62,49 +62,50 @@ train_set, valid_set, test_set = random_split(set_complete, [train_size,valid_si
 
 batch_size_train = 8192
 
-train_loader = DataLoader(train_set , batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+train_loader = DataLoader(train_set, batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 valid_loader = DataLoader(valid_set , batch_size=8192             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-test_loader  = DataLoader(test_set  , batch_size=1                ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+test_loader  = DataLoader(test_set , batch_size=8192             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 
 
 class RNN(nn.Module):
-    def __init__(self, hidden_size, num_layers):
+    def __init__(self, hidden_size, num_layers,fd_n):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.rnn = nn.RNN(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
-        self.fc   = nn.Linear(in_features=hidden_size,out_features=30)
-        self.fc2  = nn.Linear(in_features=30,out_features=3)
-        # self.fc3  = nn.Linear(in_features=50,out_features=50)
-        # self.fc4  = nn.Linear(in_features=50,out_features=3)
-
+        self.fcx   = nn.Linear(in_features=hidden_size,out_features=fd_n)
+        self.fcx2  = nn.Linear(in_features=fd_n,out_features=1)
+        self.fcy   = nn.Linear(in_features=hidden_size,out_features=fd_n)
+        self.fcy2  = nn.Linear(in_features=fd_n,out_features=1)
+        self.fcw   = nn.Linear(in_features=hidden_size,out_features=fd_n)
+        self.fcw2  = nn.Linear(in_features=fd_n,out_features=1)
 
     def forward(self,x):
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device) 
-        # c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
-        # print(x.shape)
-        out, _ = self.rnn(x,h0)
-        # out, _ = self.rnn(x, (h0, c0))
-        out    = self.fc(F.relu(out[:, -1, :]))
-        out    = self.fc2(F.relu(out))
-        # out    = self.fc3(F.relu(out))
-        # out    = self.fc4(F.relu(out))
+        out_rnn, _ = self.rnn(x,h0)
+        outx     = self.fcx(F.relu(out_rnn[:, -1, :]))
+        outx     = self.fcx2(F.relu(outx))
+        outy     = self.fcy(F.relu(out_rnn[:, -1, :]))
+        outy     = self.fcy2(F.relu(outy))
+        outw     = self.fcw(F.relu(out_rnn[:, -1, :]))
+        outw     = self.fcw2(F.relu(outw))
 
-        return out
+        return outx,outy,outw
 
 
-model = RNN(150,3)
+model = RNN(150,3,50)
 
 model.float()
 model.to(device)
 
-criterion = torch.nn.MSELoss()
-# criterion = torch.nn.L1Loss()
+criterion_x = torch.nn.MSELoss()
+criterion_y = torch.nn.MSELoss()
+criterion_w = torch.nn.MSELoss()
 
 
 optimizer = torch.optim.AdamW(model.parameters(),lr=0.00002)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
-epochs    = 20
+epochs    = 2000
 cntw = 0
 
 loss_valid = []
@@ -117,8 +118,14 @@ for epoch in range(epochs):
     for i, data in enumerate(train_loader):
         # inputs, labels = data[0].to(device), data[1].to(device)
         inputs, labels = data[0], data[1]
-        outputs = model(inputs)
-        loss = criterion(outputs, labels)
+        outputs_x, outputs_y, outputs_w  = model(inputs)
+        out  = torch.cat((outputs_x, outputs_y, outputs_w ),dim=1)
+        loss = criterion_x(out,labels)
+        # loss_x = criterion_x(outputs_x, labels[:,0])
+        # loss_y = criterion_y(outputs_y, labels[:,1])
+        # loss_w = criterion_w(outputs_w, labels[:,2])
+
+        # loss = loss_x + loss_y + loss_w
 
         optimizer.zero_grad()
         loss.backward()
@@ -135,21 +142,27 @@ for epoch in range(epochs):
     with no_grad():
         for i, data in enumerate(valid_loader, 0):
             inputs, labels = data[0], data[1]
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
+            outputs_x, outputs_y, outputs_w  = model(inputs)
+            out  = torch.cat((outputs_x, outputs_y, outputs_w ),dim=1)
+            loss = criterion_x(out,labels)
+            # loss_x = criterion_x(outputs_x, labels[:,0])
+            # loss_y = criterion_y(outputs_y, labels[:,1])
+            # loss_w = criterion_w(outputs_w, labels[:,2])
+
+            # loss = loss_x + loss_y + loss_w
 
             running_loss_valid += loss.item()
         writer.add_scalars("x", {
             'label_x': labels[0,0].item(),
-            'out_x': outputs[0][0].item(),
+            'out_x': outputs_x[0][0].item(),
         }, cntw)
         writer.add_scalars("y", {
             'label_y': labels[0,1].item(),
-            'out_y': outputs[0][1].item(),
+            'out_y': outputs_y[0][0].item(),
         }, cntw)
         writer.add_scalars("W", {
             'label_w': labels[0,2].item(),
-            'out_w': outputs[0][2].item(),
+            'out_w': outputs_w[0][0].item(),
         }, cntw)
         cntw = cntw + 1
 
@@ -164,23 +177,29 @@ model.eval()
 with no_grad():
     for i, data in enumerate(test_loader, 0):
         inputs, labels = data[0], data[1]
-        outputs = model(inputs)
-        loss = criterion(outputs, labels)
+        outputs_x, outputs_y, outputs_w  = model(inputs)
+        out  = torch.cat((outputs_x, outputs_y, outputs_w ),dim=1)
+        loss = criterion_x(out,labels)
+        # loss_x = criterion_x(outputs_x, labels[:,0])
+        # loss_y = criterion_y(outputs_y, labels[:,1])
+        # loss_w = criterion_w(outputs_w, labels[:,2])
+
+        # loss = loss_x + loss_y + loss_w
 
         running_loss_valid += loss.item()
-        writer.add_scalars("x", {
-            'test_label_x': labels[0,0].item(),
-            'test_out_x': outputs[0][0].item(),
-        }, cntw)
-        writer.add_scalars("y", {
-            'test_label_y': labels[0,1].item(),
-            'test_out_y': outputs[0][1].item(),
-        }, cntw)
-        writer.add_scalars("W", {
-            'test_label_w': labels[0,2].item(),
-            'test_out_w': outputs[0][2].item(),
-        }, cntw)
-        cntw = cntw + 1
+    writer.add_scalars("x", {
+        'test_label_x': labels[0,0].item(),
+        'test_out_x': outputs_x[0][0].item(),
+    }, cntw)
+    writer.add_scalars("y", {
+        'test_label_y': labels[0,1].item(),
+        'test_out_y': outputs_y[0][0].item(),
+    }, cntw)
+    writer.add_scalars("W", {
+        'test_label_w': labels[0,2].item(),
+        'test_out_w': outputs_w[0][0].item(),
+    }, cntw)
+    cntw = cntw + 1
 
     running_loss_valid = running_loss_valid/float(len(test_loader))
     loss_valid.append(running_loss_valid)
