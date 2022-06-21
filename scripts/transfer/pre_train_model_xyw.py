@@ -93,7 +93,7 @@ class RNN(nn.Module):
         return outx,outy,outw
 
 
-model = RNN(50,2,30)
+model = RNN(150,3,150)
 
 model.float()
 model.to(device)
@@ -103,7 +103,7 @@ criterion_y = torch.nn.MSELoss()
 criterion_w = torch.nn.MSELoss()
 
 
-optimizer = torch.optim.AdamW(model.parameters(),lr=0.0001)
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.00005)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
 epochs    = 2000
 cntw = 0
