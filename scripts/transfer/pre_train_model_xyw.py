@@ -105,7 +105,7 @@ criterion_w = torch.nn.MSELoss()
 
 optimizer = torch.optim.AdamW(model.parameters(),lr=0.00005)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
-epochs    = 2000
+epochs    = 3000
 cntw = 0
 
 loss_valid = []
