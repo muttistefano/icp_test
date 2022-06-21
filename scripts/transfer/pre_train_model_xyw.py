@@ -116,16 +116,10 @@ for epoch in range(epochs):
     running_loss_valid = 0.0
     model.train()
     for i, data in enumerate(train_loader):
-        # inputs, labels = data[0].to(device), data[1].to(device)
         inputs, labels = data[0], data[1]
         outputs_x, outputs_y, outputs_w  = model(inputs)
         out  = torch.cat((outputs_x, outputs_y, outputs_w ),dim=1)
         loss = criterion_x(out,labels)
-        # loss_x = criterion_x(outputs_x, labels[:,0])
-        # loss_y = criterion_y(outputs_y, labels[:,1])
-        # loss_w = criterion_w(outputs_w, labels[:,2])
-
-        # loss = loss_x + loss_y + loss_w
 
         optimizer.zero_grad()
         loss.backward()
@@ -145,11 +139,6 @@ for epoch in range(epochs):
             outputs_x, outputs_y, outputs_w  = model(inputs)
             out  = torch.cat((outputs_x, outputs_y, outputs_w ),dim=1)
             loss = criterion_x(out,labels)
-            # loss_x = criterion_x(outputs_x, labels[:,0])
-            # loss_y = criterion_y(outputs_y, labels[:,1])
-            # loss_w = criterion_w(outputs_w, labels[:,2])
-
-            # loss = loss_x + loss_y + loss_w
 
             running_loss_valid += loss.item()
         writer.add_scalars("x", {
@@ -178,35 +167,20 @@ with no_grad():
     for i, data in enumerate(test_loader, 0):
         inputs, labels = data[0], data[1]
         outputs_x, outputs_y, outputs_w  = model(inputs)
-        out  = torch.cat((outputs_x, outputs_y, outputs_w ),dim=1)
-        loss = criterion_x(out,labels)
-        # loss_x = criterion_x(outputs_x, labels[:,0])
-        # loss_y = criterion_y(outputs_y, labels[:,1])
-        # loss_w = criterion_w(outputs_w, labels[:,2])
-
-        # loss = loss_x + loss_y + loss_w
-
-        running_loss_valid += loss.item()
-    writer.add_scalars("x", {
-        'test_label_x': labels[0,0].item(),
-        'test_out_x': outputs_x[0][0].item(),
-    }, cntw)
-    writer.add_scalars("y", {
-        'test_label_y': labels[0,1].item(),
-        'test_out_y': outputs_y[0][0].item(),
-    }, cntw)
-    writer.add_scalars("W", {
-        'test_label_w': labels[0,2].item(),
-        'test_out_w': outputs_w[0][0].item(),
-    }, cntw)
-    cntw = cntw + 1
-
-    running_loss_valid = running_loss_valid/float(len(test_loader))
-    loss_valid.append(running_loss_valid)
-    writer.add_scalars("test_loss", {
-                    'test_valid': running_loss_valid,
-    }, epoch)
-    writer.flush()
+        writer.add_scalars("x", {
+            'test_label_x': labels[0,0].item(),
+            'test_out_x': outputs_x[0][0].item(),
+        }, cntw)
+        writer.add_scalars("y", {
+            'test_label_y': labels[0,1].item(),
+            'test_out_y': outputs_y[0][0].item(),
+        }, cntw)
+        writer.add_scalars("W", {
+            'test_label_w': labels[0,2].item(),
+            'test_out_w': outputs_w[0][0].item(),
+        }, cntw)
+        cntw = cntw + 1
+        writer.flush()
 
 # np.save("out/gru_l1_adamw_00002_1500_loss.net",np.asarray(loss_valid))
 torch.save(model.state_dict(), "model.net")

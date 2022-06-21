@@ -104,7 +104,7 @@ criterion = torch.nn.MSELoss()
 
 optimizer = torch.optim.AdamW(model.parameters(),lr=0.00002)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
-epochs    = 20
+epochs    = 2000
 cntw = 0
 
 loss_valid = []
@@ -181,13 +181,7 @@ with no_grad():
             'test_out_w': outputs[0][2].item(),
         }, cntw)
         cntw = cntw + 1
-
-    running_loss_valid = running_loss_valid/float(len(test_loader))
-    loss_valid.append(running_loss_valid)
-    writer.add_scalars("test_loss", {
-                    'test_valid': running_loss_valid,
-    }, epoch)
-    writer.flush()
+        writer.flush()
 
 # np.save("out/gru_l1_adamw_00002_1500_loss.net",np.asarray(loss_valid))
 torch.save(model.state_dict(), "model.net")
