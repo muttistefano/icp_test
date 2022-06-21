@@ -183,5 +183,5 @@ with no_grad():
         writer.flush()
 
 # np.save("out/gru_l1_adamw_00002_1500_loss.net",np.asarray(loss_valid))
-torch.save(model.state_dict(), "model.net")
+torch.save(model.state_dict(), "model_xyw.net")
 
