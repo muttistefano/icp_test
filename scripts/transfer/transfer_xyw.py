@@ -157,15 +157,18 @@ for epoch in range(epochs):
         # for lbb,ott in zip(labels,outputs):
         writer.add_scalars("x", {
             'label_x': labels[0,0].item(),
-            'out_x': (outputs_x[0][0].item()*(tf_min_max[1] -  tf_min_max[0])) + tf_min_max[0],
+            # 'out_x': (outputs_x[0][0].item()*(tf_min_max[1] -  tf_min_max[0])) + tf_min_max[0],
+            'out_x': outputs_x[0][0].item(),
         }, cntw)
         writer.add_scalars("y", {
             'label_y': labels[0,1].item(),
-            'out_y': (outputs_y[0][0].item()*(tf_min_max[3] -  tf_min_max[2])) + tf_min_max[2],
+            # 'out_y': (outputs_y[0][0].item()*(tf_min_max[3] -  tf_min_max[2])) + tf_min_max[2],
+            'out_y': outputs_y[0][0].item(),
         }, cntw)
         writer.add_scalars("W", {
             'label_w': labels[0,2].item(),
-            'out_w': (outputs_w[0][0].item()*(tf_min_max[5] -  tf_min_max[4])) + tf_min_max[4],
+            # 'out_w': (outputs_w[0][0].item()*(tf_min_max[5] -  tf_min_max[4])) + tf_min_max[4],
+            'out_w': outputs_w[0][0].item(),
         }, cntw)
         cntw = cntw + 1
 
