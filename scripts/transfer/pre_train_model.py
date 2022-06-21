@@ -73,8 +73,8 @@ class RNN(nn.Module):
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.rnn = nn.RNN(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
-        self.fc   = nn.Linear(in_features=hidden_size,out_features=100)
-        self.fc2  = nn.Linear(in_features=100,out_features=3)
+        self.fc   = nn.Linear(in_features=hidden_size,out_features=30)
+        self.fc2  = nn.Linear(in_features=30,out_features=3)
         # self.fc3  = nn.Linear(in_features=50,out_features=50)
         # self.fc4  = nn.Linear(in_features=50,out_features=3)
 
@@ -102,9 +102,9 @@ criterion = torch.nn.MSELoss()
 # criterion = torch.nn.L1Loss()
 
 
-optimizer = torch.optim.AdamW(model.parameters(),lr=0.00001)
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.00002)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
-epochs    = 4000
+epochs    = 2000
 cntw = 0
 
 loss_valid = []
