@@ -149,8 +149,9 @@ for epoch in range(epochs):
         for i, data in enumerate(valid_loader, 0):
             # inputs, labels = data[0].to(device), data[1].to(device)
             inputs, labels = data[0], data[1]
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
+            outputs_x, outputs_y, outputs_w  = model(inputs)
+            out  = torch.cat((outputs_x, outputs_y, outputs_w ),dim=1)
+            loss = criterion(out,labels)
 
             running_loss_valid += loss.item()
         # for lbb,ott in zip(labels,outputs):
