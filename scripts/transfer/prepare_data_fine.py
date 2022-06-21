@@ -176,7 +176,6 @@ print(laser_tot.nbytes * 1e-6)
 print(tf_tot.nbytes * 1e-6)
 
 # print("lasers mean and std: " + str(laser_tot.mean()) + " " + str(laser_tot.std()))
-tf_min_max = np.array([tf_tot[:,0].min(),tf_tot[:,0].max(),tf_tot[:,1].min(),tf_tot[:,1].max(),tf_tot[:,2].min(),tf_tot[:,2].max()])
 
 tf_min_max = np.load("tf_min_max.npy")
 
