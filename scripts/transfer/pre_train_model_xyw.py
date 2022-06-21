@@ -103,7 +103,7 @@ criterion_y = torch.nn.MSELoss()
 criterion_w = torch.nn.MSELoss()
 
 
-optimizer = torch.optim.AdamW(model.parameters(),lr=0.00002)
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.0001)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
 epochs    = 2000
 cntw = 0
