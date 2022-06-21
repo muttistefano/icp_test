@@ -95,7 +95,7 @@ class RNN(nn.Module):
 
 
 
-model = RNN(150,3,50)
+model = RNN(150,3,150)
 model.load_state_dict(torch.load("model_xyw.net"))
 model.eval()
 
