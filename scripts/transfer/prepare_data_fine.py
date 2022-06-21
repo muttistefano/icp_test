@@ -161,7 +161,7 @@ laser_tot = []
 tf_tot    = []
 
 for cnt,(las_s,tf_s) in enumerate(zip(ranges_data_array,april_tf_1)):
-    rnd_idx_all = np.random.randint(0,len(ranges_data_array),size=(5))
+    rnd_idx_all = np.random.randint(0,len(ranges_data_array),size=(20))
     rnd_idx = np.setdiff1d(rnd_idx_all,cnt)
     for elem in rnd_idx:
         laser_tot.append(np.concatenate((las_s,ranges_data_array[elem])))
