@@ -114,7 +114,7 @@ model.to(device)
 criterion = torch.nn.MSELoss(reduction="sum")
 
 
-optimizer = torch.optim.AdamW(model.parameters(),lr=0.00002)
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.000001)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
 epochs    = 1500
 cntw = 0
