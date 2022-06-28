@@ -111,7 +111,7 @@ for cnt,child in enumerate(model.children()):
             param.requires_grad = False
 
 
-criterion = torch.nn.MSELoss(reduction="mean")
+criterion = torch.nn.MSELoss(reduction="sum")
 
 
 optimizer = torch.optim.AdamW(model.parameters(),lr=0.00005)
