@@ -77,13 +77,13 @@ laser_files           = natsorted(laser_files,  key=lambda y: y.lower())
 print(len(images_files),len(laser_files))
 
 april_tf_1 = []
-april_tf_2 = []
+
 
 ## images apritags
-if (os.path.isfile(main_path + "aptil_tf_1.npy") and os.path.isfile(main_path + "aptil_tf_2.npy")):
+if os.path.isfile(main_path + "aptil_tf_1.npy"):
     print("aptil_tf file found")
     april_tf_1         = np.load(main_path + "aptil_tf_1.npy")
-    april_tf_2         = np.load(main_path + "aptil_tf_2.npy")
+
 else:
     print("Computingh aptil_tf  file")
 
@@ -113,25 +113,17 @@ else:
 
 
         for tag in tags:
-            if tag.tag_id==1:
+            if tag.tag_id==0:
                 TT = np.eye(4)
                 TT[0:3,0:3] = tag.pose_R
                 TT[0,3] = tag.pose_t[0]
                 TT[1,3] = tag.pose_t[1]
                 TT[2,3] = tag.pose_t[2]
                 april_tf_1.append(TT)
-            if tag.tag_id==2:
-                TT = np.eye(4)
-                TT[0:3,0:3] = tag.pose_R
-                TT[0,3] = tag.pose_t[0]
-                TT[1,3] = tag.pose_t[1]
-                TT[2,3] = tag.pose_t[2]
-                april_tf_2.append(TT)
+
 
     april_tf_1 = np.asarray(april_tf_1)
-    april_tf_2 = np.asarray(april_tf_2)
     np.save(main_path + "aptil_tf_1.npy",april_tf_1)
-    np.save(main_path + "aptil_tf_2.npy",april_tf_2)
 
 april_tf_1 = np.asarray(april_tf_1)
 
