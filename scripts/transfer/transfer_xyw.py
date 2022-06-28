@@ -54,8 +54,8 @@ class CustomDataset(Dataset):
 set_complete = CustomDataset(laser_array.astype(np.float32),tf_array)
 
 
-train_size = int(len(set_complete) * 0.75)
-valid_size = int(len(set_complete) * 0.15)
+train_size = int(len(set_complete) * 0.65)
+valid_size = int(len(set_complete) * 0.20)
 test_size  = len(set_complete)  - train_size - valid_size
 train_set, valid_set, test_set = random_split(set_complete, [train_size,valid_size,test_size ])
 
