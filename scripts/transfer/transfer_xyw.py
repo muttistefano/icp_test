@@ -62,8 +62,8 @@ train_set, valid_set, test_set = random_split(set_complete, [train_size,valid_si
 
 batch_size_train = 8192
 
-train_loader = DataLoader(train_set, batch_size=128             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-valid_loader = DataLoader(valid_set , batch_size=16            ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+train_loader = DataLoader(train_set, batch_size=16             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+valid_loader = DataLoader(valid_set, batch_size=16            ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 test_loader  = DataLoader(test_set , batch_size=16             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 
 
