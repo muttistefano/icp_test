@@ -9,8 +9,10 @@ import sys
 
 if __name__ == "__main__":
     rospy.init_node('run_acquire')
-    rospy.wait_for_service('/snap_azure')
-    snap_azure  = rospy.ServiceProxy('/snap_azure', Trigger)
+    # rospy.wait_for_service('/snap_azure')
+    # snap_realsense  = rospy.ServiceProxy('/snap_azure', Trigger)
+    rospy.wait_for_service('/snap_realsense')
+    snap_realsense  = rospy.ServiceProxy('/snap_realsense', Trigger)
     cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
     rt = rospy.Rate(50)
 
@@ -28,10 +30,10 @@ if __name__ == "__main__":
             rt.sleep()
 
         
-        rospy.sleep(0.5)
+        rospy.sleep(0.2)
 
         print("snapping")
-        sss = snap_azure()
+        sss = snap_realsense()
 
-        rospy.sleep(0.5)
+        rospy.sleep(0.2)
 
