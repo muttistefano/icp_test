@@ -422,12 +422,12 @@ tf_s1 = []
 for i in range(1,len(april_tf_1)):
     tf_s1.append(np.linalg.inv(april_tf_1[i-1]) @ april_tf_1[i])
  
-tf_s1 = np.asarray(tf_s1)
-print(pcl_data_array_fil[0].shape)
-plt.plot(pcl_data_array_fil[0][:,0],pcl_data_array_fil[0][:,1])
-plt.plot(pcl_data_array_fil[10][:,0],pcl_data_array_fil[10][:,1])
-plt.show()
-sys.exit()
+# tf_s1 = np.asarray(tf_s1)
+# print(pcl_data_array_fil[0].shape)
+# plt.plot(pcl_data_array_fil[0][:,0],pcl_data_array_fil[0][:,1])
+# plt.plot(pcl_data_array_fil[10][:,0],pcl_data_array_fil[10][:,1])
+# plt.show()
+# sys.exit()
 
 front_icp_tf2 = []
 del_el = []
@@ -468,7 +468,7 @@ if True:
             #     continue
             
             # front_icp_tf2.append(mat_end)
-            front_icp_tf2.append(mat_end)
+            front_icp_tf2.append(np.linalg.inv(tf_M2))
 
 if False:
     for cnt,T in enumerate(ICP_data_array_front):
@@ -523,12 +523,12 @@ tf_s1 = np.delete(tf_s1, del_el,axis=0)
 
 
 
-HH = np.array([[-1.         , 0.       ,   0.        ,  -0.00        ],
+HH = np.array([[ 1.         , 0.       ,   0.        ,  -0.00        ],
                [ 0.        ,  1.       ,   0.      ,    0.0          ],
                [-0.       ,   0.        ,  1.     ,     0.           ],
                [ 0.         , 0.         , 0.    ,      1.           ]])
 
-if False:
+if True:
 
     front_icp_tf2_hh = []
     for el in front_icp_tf2 :

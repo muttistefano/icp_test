@@ -127,6 +127,12 @@ else:
 
 april_tf_1 = np.asarray(april_tf_1)
 
+#x-y tag rot 90°
+april_tf_tmp = april_tf_1
+
+april_tf_1[:,0,3] = -1 * april_tf_tmp[:,1,3]
+april_tf_1[:,1,3] =      april_tf_tmp[:,0,3]
+
 ## laser ranges
 if os.path.isfile(main_path + "ranges_data_array.npy"):
     print("ranges_data_array file found")
