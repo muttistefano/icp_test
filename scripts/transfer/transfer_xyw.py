@@ -175,22 +175,24 @@ for epoch in range(epochs):
         }, epoch)
         writer.flush()
 
+tf_min_max = np.load("tf_min_max_fine.npy")
+
 model.eval()
 with no_grad():
     for i, data in enumerate(test_loader, 0):
         inputs, labels = data[0], data[1]
         outputs_x, outputs_y, outputs_w  = model(inputs)
         writer.add_scalars("x", {
-            'test_label_x': labels[0,0].item(),
-            'test_out_x': outputs_x[0][0].item(),
+            'test_label_x': (labels[0,0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
+            'test_out_x': (outputs_x[0][0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
         }, cntw)
         writer.add_scalars("y", {
-            'test_label_y': labels[0,1].item(),
-            'test_out_y': outputs_y[0][0].item(),
+            'test_label_y': (labels[0,1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
+            'test_out_y': (outputs_y[0][0].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
         }, cntw)
         writer.add_scalars("W", {
-            'test_label_w': labels[0,2].item(),
-            'test_out_w': outputs_w[0][0].item(),
+            'test_label_w': (labels[0,2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
+            'test_out_w': (outputs_w[0][0].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
         }, cntw)
         cntw = cntw + 1
         writer.flush()
