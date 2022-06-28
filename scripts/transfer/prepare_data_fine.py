@@ -140,8 +140,9 @@ else:
     # with open(main_path + 'ranges_data_array', 'wb') as fp:
         # pickle.dump(ranges_data_array, fp)
 
-
-ranges_data_array = ranges_data_array[:,:,718:1228]
+print(ranges_data_array.shape)
+# ranges_data_array = ranges_data_array[:,:,718:1228]
+ranges_data_array = ranges_data_array[:,:,:510]
 
 ranges_data_array[ranges_data_array == np.inf] = 0
 ranges_data_array[ranges_data_array > 3] = 0
