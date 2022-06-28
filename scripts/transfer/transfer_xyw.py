@@ -104,11 +104,11 @@ model.to(device)
 
 
 
-# for cnt,child in enumerate(model.children()):
-#     print(cnt,child)
-#     if (cnt < 2) :
-#         for param in child.parameters():
-#             param.requires_grad = False
+for cnt,child in enumerate(model.children()):
+    print(cnt,child)
+    if (cnt < 2) :
+        for param in child.parameters():
+            param.requires_grad = False
 
 
 criterion = torch.nn.MSELoss(reduction="sum")
