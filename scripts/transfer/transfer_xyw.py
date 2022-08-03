@@ -120,6 +120,8 @@ epochs    = 1500
 cntw = 0
 
 loss_valid = []
+loss_train = []
+
 
 for epoch in range(epochs):
 
@@ -143,6 +145,8 @@ for epoch in range(epochs):
     writer.add_scalars("loss", {
                         'train': running_loss,
     }, epoch)
+    loss_train.append(running_loss)
+
 
     model.eval()
     with no_grad():
@@ -173,6 +177,8 @@ for epoch in range(epochs):
         writer.add_scalars("loss", {
                         'valid': running_loss_valid,
         }, epoch)
+        loss_valid.append(running_loss_valid)
+
         writer.flush()
 
 tf_min_max = np.load("tf_min_max_fine.npy")
@@ -198,4 +204,9 @@ with no_grad():
         writer.flush()
 
 torch.save(model.state_dict(), "model_xyw_fine.net")
+loss_train = np.asarray(running_loss)
+loss_valid = np.asarray(running_loss_valid)
+
+np.save("loss_train_fine",loss_train)
+np.save("loss_valid_fine",loss_valid)
 
