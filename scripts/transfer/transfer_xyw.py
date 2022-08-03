@@ -204,8 +204,8 @@ with no_grad():
         writer.flush()
 
 torch.save(model.state_dict(), "model_xyw_fine.net")
-loss_train = np.asarray(running_loss)
-loss_valid = np.asarray(running_loss_valid)
+loss_train = np.asarray(loss_train)
+loss_valid = np.asarray(loss_valid)
 
 np.save("loss_train_fine",loss_train)
 np.save("loss_valid_fine",loss_valid)

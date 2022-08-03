@@ -187,8 +187,8 @@ with no_grad():
 
 # np.save("out/gru_l1_adamw_00002_1500_loss.net",np.asarray(loss_valid))
 torch.save(model.state_dict(), "model_xyw.net")
-loss_train = np.asarray(running_loss)
-loss_valid = np.asarray(running_loss_valid)
+loss_train = np.asarray(loss_train)
+loss_valid = np.asarray(loss_valid)
 
 np.save("loss_train_pre",loss_train)
 np.save("loss_valid_pre",loss_valid)
