@@ -31,6 +31,7 @@ tf_array    = np.load("tf.npy")
 
 print("GPU avail : ",torch.cuda.is_available())
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#device = "cpu"
 print("DEvice: ",device)
 
 
@@ -60,11 +61,11 @@ test_size  = len(set_complete)  - train_size - valid_size
 train_set, valid_set, test_set = random_split(set_complete, [train_size,valid_size,test_size ])
 
 
-batch_size_train = 8192
+batch_size_train = 512
 
 train_loader = DataLoader(train_set,  batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-valid_loader = DataLoader(valid_set , batch_size=8192             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-test_loader  = DataLoader(test_set ,  batch_size=8192             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+valid_loader = DataLoader(valid_set , batch_size=batch_size_train             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+test_loader  = DataLoader(test_set ,  batch_size=batch_size_train             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 
 
 class RNN(nn.Module):
@@ -93,7 +94,7 @@ class RNN(nn.Module):
         return outx,outy,outw
 
 
-model = RNN(150,3,150)
+model = RNN(150,3,30)
 
 model.float()
 model.to(device)

@@ -30,8 +30,8 @@ tf_min_max  = np.load("tf_min_max.npy")
 
 print(laser_array.shape)
 print("GPU avail : ",torch.cuda.is_available())
-#device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-device = "cpu"
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#device = "cpu"
 print("DEvice: ",device)
 
 
@@ -96,7 +96,7 @@ class RNN(nn.Module):
 
 
 
-model = RNN(150,3,150)
+model = RNN(150,3,30)
 model.load_state_dict(torch.load("model_xyw.net"))
 model.eval()
 
@@ -105,11 +105,11 @@ model.to(device)
 
 
 
-#for cnt,child in enumerate(model.children()):
-#    print(cnt,child)
-#    if (cnt < 2) :
-#        for param in child.parameters():
-#            param.requires_grad = False
+for cnt,child in enumerate(model.children()):
+    print(cnt,child)
+    if (cnt < 2) :
+        for param in child.parameters():
+            param.requires_grad = False
 
 
 criterion = torch.nn.MSELoss(reduction="sum")
