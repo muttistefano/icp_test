@@ -105,17 +105,17 @@ model.to(device)
 
 
 
-for cnt,child in enumerate(model.children()):
-    print(cnt,child)
-    if (cnt < 2) :
-        for param in child.parameters():
-            param.requires_grad = False
+#for cnt,child in enumerate(model.children()):
+#    print(cnt,child)
+#    if (cnt < 2) :
+#        for param in child.parameters():
+#            param.requires_grad = False
 
 
 criterion = torch.nn.MSELoss(reduction="sum")
 
 
-optimizer = torch.optim.AdamW(model.parameters(),lr=0.001)
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.0001)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
 epochs    = 1500
 cntw = 0
