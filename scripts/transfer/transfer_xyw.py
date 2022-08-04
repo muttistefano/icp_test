@@ -30,7 +30,8 @@ tf_min_max  = np.load("tf_min_max.npy")
 
 print(laser_array.shape)
 print("GPU avail : ",torch.cuda.is_available())
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = "cpu"
 print("DEvice: ",device)
 
 
@@ -62,9 +63,9 @@ train_set, valid_set, test_set = random_split(set_complete, [train_size,valid_si
 
 batch_size_train = 8192
 
-train_loader = DataLoader(train_set, batch_size=16             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-valid_loader = DataLoader(valid_set, batch_size=16            ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-test_loader  = DataLoader(test_set , batch_size=16             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+train_loader = DataLoader(train_set, batch_size=batch_size_train             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+valid_loader = DataLoader(valid_set, batch_size=batch_size_train            ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+test_loader  = DataLoader(test_set , batch_size=batch_size_train             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 
 
 class RNN(nn.Module):
@@ -104,11 +105,11 @@ model.to(device)
 
 
 
-# for cnt,child in enumerate(model.children()):
-#     print(cnt,child)
-#     if (cnt < 2) :
-#         for param in child.parameters():
-#             param.requires_grad = False
+for cnt,child in enumerate(model.children()):
+    print(cnt,child)
+    if (cnt < 2) :
+        for param in child.parameters():
+            param.requires_grad = False
 
 
 criterion = torch.nn.MSELoss(reduction="sum")
