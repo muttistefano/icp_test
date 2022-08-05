@@ -53,15 +53,18 @@ class CustomDataset(Dataset):
 set_complete = CustomDataset(laser_array.astype(np.float32),tf_array)
 
 
-train_size = int(len(set_complete) * 0.8)
-test_size  = len(set_complete)  - train_size
-train_set, test_set = random_split(set_complete, [train_size,test_size ])
+train_size = int(len(set_complete) * 0.65)
+valid_size = int(len(set_complete) * 0.20)
+test_size  = len(set_complete)  - train_size - valid_size
+train_set, valid_set, test_set = random_split(set_complete, [train_size,valid_size,test_size ])
 
 
 batch_size_train = 8192
 
-train_loader = DataLoader(train_set, batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-test_loader  = DataLoader(test_set , batch_size=4096             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+train_loader = DataLoader(train_set, batch_size=64             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+valid_loader = DataLoader(valid_set, batch_size=64            ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+test_loader  = DataLoader(test_set , batch_size=64             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+
 
 
 class RNN(nn.Module):
@@ -69,31 +72,30 @@ class RNN(nn.Module):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.lstm = nn.GRU(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
-        # self.bn  = nn.BatchNorm1d(hidden_size)
-        self.rl  = nn.ReLU()
-        # self.drp = nn.Dropout(0.1)
-        self.fc = nn.Linear(in_features=hidden_size,out_features=30)
-        self.fc2 = nn.Linear(in_features=30,out_features=3)
+        self.rnn = nn.RNN(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
+        self.fc   = nn.Linear(in_features=hidden_size,out_features=30)
+        self.fc2  = nn.Linear(in_features=30,out_features=3)
+        # self.fc3  = nn.Linear(in_features=50,out_features=50)
+        # self.fc4  = nn.Linear(in_features=50,out_features=3)
 
 
     def forward(self,x):
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device) 
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
+        # c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         # print(x.shape)
-        out, _ = self.lstm(x,h0)
-        # out    = self.bn(out[:, -1, :])
-        # out    = self.rl(out)
-        out    = self.rl(out[:, -1, :])
-        out    = self.fc(out)
-        out    = self.rl(out)
-        out    = self.fc2(out)
+        out, _ = self.rnn(x,h0)
+        # out, _ = self.rnn(x, (h0, c0))
+        out    = self.fc(F.relu(out[:, -1, :]))
+        out    = self.fc2(F.relu(out))
+        # out    = self.fc3(F.relu(out))
+        # out    = self.fc4(F.relu(out))
+
         return out
 
 
 
 model = RNN(150,3)
-model.load_state_dict(torch.load("model_norm.net"))
+model.load_state_dict(torch.load("model.net"))
 model.eval()
 
 model.float()
@@ -113,10 +115,12 @@ criterion = torch.nn.MSELoss(reduction="mean")
 
 optimizer = torch.optim.AdamW(model.parameters(),lr=0.00005)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
-epochs    = 5000
+epochs    = 1500
 cntw = 0
 
 loss_valid = []
+loss_train = []
+
 
 for epoch in range(epochs):
 
@@ -139,10 +143,12 @@ for epoch in range(epochs):
     writer.add_scalars("loss", {
                         'train': running_loss,
     }, epoch)
+    loss_train.append(running_loss)
+
 
     model.eval()
     with no_grad():
-        for i, data in enumerate(test_loader, 0):
+        for i, data in enumerate(valid_loader, 0):
             # inputs, labels = data[0].to(device), data[1].to(device)
             inputs, labels = data[0], data[1]
             outputs = model(inputs)
@@ -170,7 +176,34 @@ for epoch in range(epochs):
                         'valid': running_loss_valid,
         }, epoch)
         writer.flush()
+        loss_valid.append(running_loss_valid)
 
-# np.save("out/gru_l1_adamw_00002_1500_loss.net",np.asarray(loss_valid))
-# torch.save(model.state_dict(), "model.net")
+tf_min_max = np.load("tf_min_max_fine.npy")
+
+model.eval()
+with no_grad():
+    for i, data in enumerate(test_loader, 0):
+        inputs, labels = data[0], data[1]
+        outputs_x, outputs_y, outputs_w  = model(inputs)
+        writer.add_scalars("x", {
+            'test_label_x': (labels[0,0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
+            'test_out_x': (outputs_x[0][0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
+        }, cntw)
+        writer.add_scalars("y", {
+            'test_label_y': (labels[0,1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
+            'test_out_y': (outputs_y[0][0].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
+        }, cntw)
+        writer.add_scalars("W", {
+            'test_label_w': (labels[0,2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
+            'test_out_w': (outputs_w[0][0].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
+        }, cntw)
+        cntw = cntw + 1
+        writer.flush()
+
+torch.save(model.state_dict(), "model_fine.net")
+loss_train = np.asarray(loss_train)
+loss_valid = np.asarray(loss_valid)
+
+np.save("loss_train_fine",loss_train)
+np.save("loss_valid_fine",loss_valid)
 

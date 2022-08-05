@@ -174,7 +174,6 @@ for epoch in range(epochs):
         cntw = cntw + 1
 
         running_loss_valid = running_loss_valid/float(len(valid_loader))
-        loss_valid.append(running_loss_valid)
         writer.add_scalars("loss", {
                         'valid': running_loss_valid,
         }, epoch)
@@ -208,6 +207,6 @@ torch.save(model.state_dict(), "model_xyw_fine.net")
 loss_train = np.asarray(loss_train)
 loss_valid = np.asarray(loss_valid)
 
-np.save("loss_train_fine",loss_train)
-np.save("loss_valid_fine",loss_valid)
+np.save("loss_train_fine_xyw",loss_train)
+np.save("loss_valid_fine_xyw",loss_valid)
 

@@ -108,6 +108,8 @@ epochs    = 2000
 cntw = 0
 
 loss_valid = []
+loss_train = []
+
 
 for epoch in range(epochs):
 
@@ -130,6 +132,8 @@ for epoch in range(epochs):
     writer.add_scalars("loss", {
                         'train': running_loss,
     }, epoch)
+    loss_train.append(running_loss)
+
 
     model.eval()
     with no_grad():
@@ -158,6 +162,7 @@ for epoch in range(epochs):
         writer.add_scalars("loss", {
                         'valid': running_loss_valid,
         }, epoch)
+        loss_valid.append(running_loss_valid)
         writer.flush()
 
 model.eval()
@@ -185,4 +190,9 @@ with no_grad():
 
 # np.save("out/gru_l1_adamw_00002_1500_loss.net",np.asarray(loss_valid))
 torch.save(model.state_dict(), "model.net")
+loss_train = np.asarray(loss_train)
+loss_valid = np.asarray(loss_valid)
+
+np.save("loss_train_pre",loss_train)
+np.save("loss_valid_pre",loss_valid)
 

@@ -61,40 +61,46 @@ test_size  = len(set_complete)  - train_size - valid_size
 train_set, valid_set, test_set = random_split(set_complete, [train_size,valid_size,test_size ])
 
 
-batch_size_train = 512
+batch_size_train = 256
 
 train_loader = DataLoader(train_set,  batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-valid_loader = DataLoader(valid_set , batch_size=batch_size_train             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-test_loader  = DataLoader(test_set ,  batch_size=batch_size_train             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+valid_loader = DataLoader(valid_set , batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+test_loader  = DataLoader(test_set ,  batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 
 
 class RNN(nn.Module):
-    def __init__(self, hidden_size, num_layers,fd_n):
+    def __init__(self, hidden_size, num_layers,fd_n,fd_e):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.rnn   = nn.RNN(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
         self.fcx   = nn.Linear(in_features=hidden_size,out_features=fd_n)
-        self.fcx2  = nn.Linear(in_features=fd_n,out_features=1)
+        self.fcx1  = nn.Linear(in_features=fd_n,out_features=fd_e)
+        self.fcx2  = nn.Linear(in_features=fd_e,out_features=1)
         self.fcy   = nn.Linear(in_features=hidden_size,out_features=fd_n)
-        self.fcy2  = nn.Linear(in_features=fd_n,out_features=1)
+        self.fcy1  = nn.Linear(in_features=fd_n,out_features=fd_e)
+        self.fcy2  = nn.Linear(in_features=fd_e,out_features=1)
         self.fcw   = nn.Linear(in_features=hidden_size,out_features=fd_n)
-        self.fcw2  = nn.Linear(in_features=fd_n,out_features=1)
+        self.fcw1  = nn.Linear(in_features=fd_n,out_features=fd_e)
+        self.fcw2  = nn.Linear(in_features=fd_e,out_features=1)
 
     def forward(self,x):
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device) 
         out_rnn, _ = self.rnn(x,h0)
         outx       = self.fcx(F.relu(out_rnn[:, -1, :]))
+        outx       = self.fcx1(F.relu(outx))
         outx       = self.fcx2(F.relu(outx))
         outy       = self.fcy(F.relu(out_rnn[:, -1, :]))
+        outy       = self.fcy1(F.relu(outy))
         outy       = self.fcy2(F.relu(outy))
         outw       = self.fcw(F.relu(out_rnn[:, -1, :]))
+        outw       = self.fcw1(F.relu(outw))
         outw       = self.fcw2(F.relu(outw))
 
         return outx,outy,outw
 
 
-model = RNN(150,3,30)
+model = RNN(150,3,120,30)
 
 model.float()
 model.to(device)
@@ -104,7 +110,7 @@ criterion_y = torch.nn.MSELoss()
 criterion_w = torch.nn.MSELoss()
 
 
-optimizer = torch.optim.AdamW(model.parameters(),lr=0.00005)
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.00002)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
 epochs    = 3000
 cntw = 0
@@ -159,12 +165,13 @@ for epoch in range(epochs):
         cntw = cntw + 1
 
         running_loss_valid = running_loss_valid/float(len(valid_loader))
-        loss_valid.append(running_loss_valid)
         writer.add_scalars("loss", {
                         'valid': running_loss_valid,
         }, epoch)
         loss_valid.append(running_loss_valid)
         writer.flush()
+
+test_eval = []
 
 model.eval()
 with no_grad():
@@ -185,12 +192,15 @@ with no_grad():
         }, cntw)
         cntw = cntw + 1
         writer.flush()
+        test_eval.append(np.array([labels[0,0].item(),outputs_x[0][0].item(),labels[0,1].item(),outputs_y[0][0].item(),labels[0,2].item(),outputs_w[0][0].item()]))
 
 # np.save("out/gru_l1_adamw_00002_1500_loss.net",np.asarray(loss_valid))
 torch.save(model.state_dict(), "model_xyw.net")
 loss_train = np.asarray(loss_train)
 loss_valid = np.asarray(loss_valid)
+test_eval  = np.asarray(test_eval)
 
-np.save("loss_train_pre",loss_train)
-np.save("loss_valid_pre",loss_valid)
+np.save("loss_train_pre_xyw",loss_train)
+np.save("loss_valid_pre_xyw",loss_valid)
+np.save("test_eval_pre_xyw",test_eval)
 
