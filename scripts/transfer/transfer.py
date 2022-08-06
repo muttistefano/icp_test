@@ -121,6 +121,7 @@ cntw = 0
 loss_valid = []
 loss_train = []
 
+tf_min_max = np.load("tf_min_max_fine.npy")
 
 for epoch in range(epochs):
 
@@ -157,16 +158,16 @@ for epoch in range(epochs):
             running_loss_valid += loss.item()
         # for lbb,ott in zip(labels,outputs):
         writer.add_scalars("x", {
-            'label_x': labels[0,0].item(),
-            'out_x': (outputs[0][0].item()*0.3416164) + 0.00555812,
+            'label_x': (labels[0,0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
+            'out_x': (outputs[0][0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
         }, cntw)
         writer.add_scalars("y", {
-            'label_y': labels[0,1].item(),
-            'out_y': (outputs[0][1].item()*0.3416164) + 0.00555812,
+            'label_y': (labels[0,1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
+            'out_y': (outputs[0][1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
         }, cntw)
         writer.add_scalars("W", {
-            'label_w': labels[0,2].item(),
-            'out_w': (outputs[0][2].item()*0.3416164) + 0.00555812,
+            'label_w': (labels[0,2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
+            'out_w': (outputs[0][2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
         }, cntw)
         cntw = cntw + 1
 
@@ -178,7 +179,7 @@ for epoch in range(epochs):
         writer.flush()
         loss_valid.append(running_loss_valid)
 
-tf_min_max = np.load("tf_min_max_fine.npy")
+
 
 model.eval()
 with no_grad():
