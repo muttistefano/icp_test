@@ -120,6 +120,7 @@ cntw = 0
 
 loss_valid = []
 loss_train = []
+test_eval  = []
 
 tf_min_max = np.load("tf_min_max_fine.npy")
 
@@ -150,34 +151,33 @@ for epoch in range(epochs):
     model.eval()
     with no_grad():
         for i, data in enumerate(valid_loader, 0):
-            # inputs, labels = data[0].to(device), data[1].to(device)
             inputs, labels = data[0], data[1]
             outputs = model(inputs)
             loss = criterion(outputs, labels)
 
             running_loss_valid += loss.item()
-        # for lbb,ott in zip(labels,outputs):
         writer.add_scalars("x", {
-            'label_x': (labels[0,0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
-            'out_x': (outputs[0][0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
+            'label_x': labels[0,0].item(),
+            'out_x': outputs[0][0].item(),
         }, cntw)
         writer.add_scalars("y", {
-            'label_y': (labels[0,1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
-            'out_y': (outputs[0][1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
+            'label_y': labels[0,1].item(),
+            'out_y': outputs[0][1].item(),
         }, cntw)
         writer.add_scalars("W", {
-            'label_w': (labels[0,2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
-            'out_w': (outputs[0][2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
+            'label_w': labels[0,2].item(),
+            'out_w': outputs[0][2].item(),
         }, cntw)
         cntw = cntw + 1
 
-        running_loss_valid = running_loss_valid/float(len(test_loader))
+        running_loss_valid = running_loss_valid/float(len(valid_loader))
         loss_valid.append(running_loss_valid)
         writer.add_scalars("loss", {
                         'valid': running_loss_valid,
         }, epoch)
-        writer.flush()
         loss_valid.append(running_loss_valid)
+        writer.flush()
+
 
 
 
@@ -185,47 +185,31 @@ model.eval()
 with no_grad():
     for i, data in enumerate(test_loader, 0):
         inputs, labels = data[0], data[1]
-        outputs = model(inputs)
+        outputs  = model(inputs)
         writer.add_scalars("x", {
-            'test_label_x': (labels[0,0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
-            'test_out_x': (outputs[0][0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
+            'test_label_x': labels[0,0].item(),
+            'test_out_x': outputs[0][0].item(),
         }, cntw)
         writer.add_scalars("y", {
-            'test_label_y': (labels[0,1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
-            'test_out_y': (outputs[0][1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
+            'test_label_y': labels[0,1].item(),
+            'test_out_y': outputs[0][1].item(),
         }, cntw)
         writer.add_scalars("W", {
-            'test_label_w': (labels[0,2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
-            'test_out_w': (outputs[0][2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
+            'test_label_w': labels[0,2].item(),
+            'test_out_w': outputs[0][2].item(),
         }, cntw)
         cntw = cntw + 1
         writer.flush()
+        test_eval.append(np.array([labels[0,0].item(),outputs[0][0].item(),labels[0,1].item(),outputs[0][1].item(),labels[0,2].item(),outputs[0][2].item()]))
 
-# model.eval()
-# with no_grad():
-#     for i, data in enumerate(test_loader, 0):
-#         inputs, labels = data[0], data[1]
-#         outputs  = model(inputs)
-#         writer.add_scalars("x", {
-#             'test_label_x': labels[0,0].item(),
-#             'test_out_x': outputs[0][0].item(),
-#         }, cntw)
-#         writer.add_scalars("y", {
-#             'test_label_y': labels[0,1].item(),
-#             'test_out_y': outputs[0][1].item(),
-#         }, cntw)
-#         writer.add_scalars("W", {
-#             'test_label_w': labels[0,2].item(),
-#             'test_out_w': outputs[0][2].item(),
-#         }, cntw)
-#         cntw = cntw + 1
-#         writer.flush()
 
 
 torch.save(model.state_dict(), "model_fine.net")
 loss_train = np.asarray(loss_train)
 loss_valid = np.asarray(loss_valid)
+test_eval  = np.asarray(test_eval)
 
 np.save("loss_train_fine",loss_train)
 np.save("loss_valid_fine",loss_valid)
+np.save("loss_eval_pre",test_eval)
 

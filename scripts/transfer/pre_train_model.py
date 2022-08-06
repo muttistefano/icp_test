@@ -109,6 +109,7 @@ cntw = 0
 
 loss_valid = []
 loss_train = []
+test_eval  = []
 
 
 for epoch in range(epochs):
@@ -186,13 +187,16 @@ with no_grad():
             'test_out_w': outputs[0][2].item(),
         }, cntw)
         cntw = cntw + 1
+        test_eval.append(np.array([labels[0,0].item(),outputs[0][0].item(),labels[0,1].item(),outputs[0][1].item(),labels[0,2].item(),outputs[0][2].item()]))
         writer.flush()
 
 # np.save("out/gru_l1_adamw_00002_1500_loss.net",np.asarray(loss_valid))
 torch.save(model.state_dict(), "model.net")
 loss_train = np.asarray(loss_train)
 loss_valid = np.asarray(loss_valid)
+test_eval  = np.asarray(test_eval)
 
 np.save("loss_train_pre",loss_train)
 np.save("loss_valid_pre",loss_valid)
+np.save("loss_eval_pre",test_eval)
 
