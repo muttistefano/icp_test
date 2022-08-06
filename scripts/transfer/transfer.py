@@ -211,5 +211,5 @@ test_eval  = np.asarray(test_eval)
 
 np.save("loss_train_fine",loss_train)
 np.save("loss_valid_fine",loss_valid)
-np.save("loss_eval_pre",test_eval)
+np.save("loss_eval_fine",test_eval)
 
