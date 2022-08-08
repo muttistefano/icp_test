@@ -61,11 +61,11 @@ test_size  = len(set_complete)  - train_size - valid_size
 train_set, valid_set, test_set = random_split(set_complete, [train_size,valid_size,test_size ])
 
 
-batch_size_train = 8192
+batch_size_train = 256
 
-train_loader = DataLoader(train_set, batch_size=64             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-valid_loader = DataLoader(valid_set, batch_size=64            ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-test_loader  = DataLoader(test_set , batch_size=64             ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+train_loader = DataLoader(train_set, batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+valid_loader = DataLoader(valid_set, batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+test_loader  = DataLoader(test_set , batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 
 
 class RNN(nn.Module):
@@ -120,7 +120,7 @@ for cnt,child in enumerate(model.children()):
 criterion = torch.nn.MSELoss(reduction="sum")
 
 
-optimizer = torch.optim.AdamW(model.parameters(),lr=0.00001)
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.0001)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
 epochs    = 1500
 cntw = 0
@@ -188,47 +188,47 @@ for epoch in range(epochs):
 
 tf_min_max = np.load("tf_min_max_fine.npy")
 
-model.eval()
-with no_grad():
-    for i, data in enumerate(test_loader, 0):
-        inputs, labels = data[0], data[1]
-        outputs_x, outputs_y, outputs_w  = model(inputs)
-        writer.add_scalars("x", {
-            'test_label_x': (labels[0,0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
-            'test_out_x': (outputs_x[0][0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
-        }, cntw)
-        writer.add_scalars("y", {
-            'test_label_y': (labels[0,1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
-            'test_out_y': (outputs_y[0][0].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
-        }, cntw)
-        writer.add_scalars("W", {
-            'test_label_w': (labels[0,2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
-            'test_out_w': (outputs_w[0][0].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
-        }, cntw)
-        cntw = cntw + 1
-        test_eval.append(np.array([labels[0,0].item(),outputs_x[0][0].item(),labels[0,1].item(),outputs_y[0][0].item(),labels[0,2].item(),outputs_w[0][0].item()]))
-        writer.flush()
-
 # model.eval()
 # with no_grad():
 #     for i, data in enumerate(test_loader, 0):
 #         inputs, labels = data[0], data[1]
 #         outputs_x, outputs_y, outputs_w  = model(inputs)
 #         writer.add_scalars("x", {
-#             'test_label_x': labels[0,0].item(),
-#             'test_out_x': outputs_x[0][0].item(),
+#             'test_label_x': (labels[0,0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
+#             'test_out_x': (outputs_x[0][0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
 #         }, cntw)
 #         writer.add_scalars("y", {
-#             'test_label_y': labels[0,1].item(),
-#             'test_out_y': outputs_y[0][0].item(),
+#             'test_label_y': (labels[0,1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
+#             'test_out_y': (outputs_y[0][0].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
 #         }, cntw)
 #         writer.add_scalars("W", {
-#             'test_label_w': labels[0,2].item(),
-#             'test_out_w': outputs_w[0][0].item(),
+#             'test_label_w': (labels[0,2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
+#             'test_out_w': (outputs_w[0][0].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
 #         }, cntw)
 #         cntw = cntw + 1
-#         writer.flush()
 #         test_eval.append(np.array([labels[0,0].item(),outputs_x[0][0].item(),labels[0,1].item(),outputs_y[0][0].item(),labels[0,2].item(),outputs_w[0][0].item()]))
+#         writer.flush()
+
+model.eval()
+with no_grad():
+    for i, data in enumerate(test_loader, 0):
+        inputs, labels = data[0], data[1]
+        outputs_x, outputs_y, outputs_w  = model(inputs)
+        writer.add_scalars("x", {
+            'test_label_x': labels[0,0].item(),
+            'test_out_x': outputs_x[0][0].item(),
+        }, cntw)
+        writer.add_scalars("y", {
+            'test_label_y': labels[0,1].item(),
+            'test_out_y': outputs_y[0][0].item(),
+        }, cntw)
+        writer.add_scalars("W", {
+            'test_label_w': labels[0,2].item(),
+            'test_out_w': outputs_w[0][0].item(),
+        }, cntw)
+        cntw = cntw + 1
+        writer.flush()
+        test_eval.append(np.array([labels[0,0].item(),outputs_x[0][0].item(),labels[0,1].item(),outputs_y[0][0].item(),labels[0,2].item(),outputs_w[0][0].item()]))
 
 
 torch.save(model.state_dict(), "model_xyw_fine.net")
@@ -238,7 +238,7 @@ test_eval  = np.asarray(test_eval)
 
 np.save("loss_train_fine_xyw",loss_train)
 np.save("loss_valid_fine_xyw",loss_valid)
-np.save("test_eval_pre_fine",test_eval)
+np.save("test_eval_fine_xyw",test_eval)
 
 
 
