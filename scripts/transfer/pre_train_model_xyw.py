@@ -61,7 +61,7 @@ test_size  = len(set_complete)  - train_size - valid_size
 train_set, valid_set, test_set = random_split(set_complete, [train_size,valid_size,test_size ])
 
 
-batch_size_train = 256
+batch_size_train = 1024
 
 train_loader = DataLoader(train_set,  batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 valid_loader = DataLoader(valid_set , batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)

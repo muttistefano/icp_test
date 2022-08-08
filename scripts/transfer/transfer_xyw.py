@@ -69,34 +69,39 @@ test_loader  = DataLoader(test_set , batch_size=64             ,shuffle=True, nu
 
 
 class RNN(nn.Module):
-    def __init__(self, hidden_size, num_layers,fd_n):
+    def __init__(self, hidden_size, num_layers,fd_n,fd_e):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.rnn = nn.RNN(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
+        self.rnn   = nn.RNN(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
         self.fcx   = nn.Linear(in_features=hidden_size,out_features=fd_n)
-        self.fcx2  = nn.Linear(in_features=fd_n,out_features=1)
+        self.fcx1  = nn.Linear(in_features=fd_n,out_features=fd_e)
+        self.fcx2  = nn.Linear(in_features=fd_e,out_features=1)
         self.fcy   = nn.Linear(in_features=hidden_size,out_features=fd_n)
-        self.fcy2  = nn.Linear(in_features=fd_n,out_features=1)
+        self.fcy1  = nn.Linear(in_features=fd_n,out_features=fd_e)
+        self.fcy2  = nn.Linear(in_features=fd_e,out_features=1)
         self.fcw   = nn.Linear(in_features=hidden_size,out_features=fd_n)
-        self.fcw2  = nn.Linear(in_features=fd_n,out_features=1)
+        self.fcw1  = nn.Linear(in_features=fd_n,out_features=fd_e)
+        self.fcw2  = nn.Linear(in_features=fd_e,out_features=1)
 
     def forward(self,x):
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device) 
         out_rnn, _ = self.rnn(x,h0)
         outx       = self.fcx(F.relu(out_rnn[:, -1, :]))
+        outx       = self.fcx1(F.relu(outx))
         outx       = self.fcx2(F.relu(outx))
         outy       = self.fcy(F.relu(out_rnn[:, -1, :]))
+        outy       = self.fcy1(F.relu(outy))
         outy       = self.fcy2(F.relu(outy))
         outw       = self.fcw(F.relu(out_rnn[:, -1, :]))
+        outw       = self.fcw1(F.relu(outw))
         outw       = self.fcw2(F.relu(outw))
 
         return outx,outy,outw
 
 
+model = RNN(150,3,120,30)
 
-
-model = RNN(150,3,30)
 model.load_state_dict(torch.load("model_xyw.net"))
 model.eval()
 
@@ -122,7 +127,7 @@ cntw = 0
 
 loss_valid = []
 loss_train = []
-
+test_eval  = []
 
 for epoch in range(epochs):
 
@@ -183,52 +188,57 @@ for epoch in range(epochs):
 
 tf_min_max = np.load("tf_min_max_fine.npy")
 
-# model.eval()
-# with no_grad():
-#     for i, data in enumerate(test_loader, 0):
-#         inputs, labels = data[0], data[1]
-#         outputs_x, outputs_y, outputs_w  = model(inputs)
-#         writer.add_scalars("x", {
-#             'test_label_x': (labels[0,0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
-#             'test_out_x': (outputs_x[0][0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
-#         }, cntw)
-#         writer.add_scalars("y", {
-#             'test_label_y': (labels[0,1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
-#             'test_out_y': (outputs_y[0][0].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
-#         }, cntw)
-#         writer.add_scalars("W", {
-#             'test_label_w': (labels[0,2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
-#             'test_out_w': (outputs_w[0][0].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
-#         }, cntw)
-#         cntw = cntw + 1
-#         writer.flush()
-
 model.eval()
 with no_grad():
     for i, data in enumerate(test_loader, 0):
         inputs, labels = data[0], data[1]
         outputs_x, outputs_y, outputs_w  = model(inputs)
         writer.add_scalars("x", {
-            'test_label_x': labels[0,0].item(),
-            'test_out_x': outputs_x[0][0].item(),
+            'test_label_x': (labels[0,0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
+            'test_out_x': (outputs_x[0][0].item() * (tf_min_max[1] - tf_min_max[0])) + tf_min_max[0],
         }, cntw)
         writer.add_scalars("y", {
-            'test_label_y': labels[0,1].item(),
-            'test_out_y': outputs_y[0][0].item(),
+            'test_label_y': (labels[0,1].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
+            'test_out_y': (outputs_y[0][0].item() * (tf_min_max[3] - tf_min_max[2]))+ tf_min_max[2],
         }, cntw)
         writer.add_scalars("W", {
-            'test_label_w': labels[0,2].item(),
-            'test_out_w': outputs_w[0][0].item(),
+            'test_label_w': (labels[0,2].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
+            'test_out_w': (outputs_w[0][0].item() * (tf_min_max[5] - tf_min_max[4]))+ tf_min_max[4],
         }, cntw)
         cntw = cntw + 1
-        writer.flush()
         test_eval.append(np.array([labels[0,0].item(),outputs_x[0][0].item(),labels[0,1].item(),outputs_y[0][0].item(),labels[0,2].item(),outputs_w[0][0].item()]))
+        writer.flush()
+
+# model.eval()
+# with no_grad():
+#     for i, data in enumerate(test_loader, 0):
+#         inputs, labels = data[0], data[1]
+#         outputs_x, outputs_y, outputs_w  = model(inputs)
+#         writer.add_scalars("x", {
+#             'test_label_x': labels[0,0].item(),
+#             'test_out_x': outputs_x[0][0].item(),
+#         }, cntw)
+#         writer.add_scalars("y", {
+#             'test_label_y': labels[0,1].item(),
+#             'test_out_y': outputs_y[0][0].item(),
+#         }, cntw)
+#         writer.add_scalars("W", {
+#             'test_label_w': labels[0,2].item(),
+#             'test_out_w': outputs_w[0][0].item(),
+#         }, cntw)
+#         cntw = cntw + 1
+#         writer.flush()
+#         test_eval.append(np.array([labels[0,0].item(),outputs_x[0][0].item(),labels[0,1].item(),outputs_y[0][0].item(),labels[0,2].item(),outputs_w[0][0].item()]))
 
 
 torch.save(model.state_dict(), "model_xyw_fine.net")
 loss_train = np.asarray(loss_train)
 loss_valid = np.asarray(loss_valid)
+test_eval  = np.asarray(test_eval)
 
 np.save("loss_train_fine_xyw",loss_train)
 np.save("loss_valid_fine_xyw",loss_valid)
+np.save("test_eval_pre_fine",test_eval)
+
+
 
