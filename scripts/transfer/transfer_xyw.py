@@ -16,7 +16,7 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from torch.utils.tensorboard import SummaryWriter
 from torch import dropout, float32, from_numpy, flatten, no_grad
 from torch.autograd import Variable
-
+import copy
 
 np.set_printoptions(threshold=np.inf)
 np.set_printoptions(suppress=True)
@@ -109,6 +109,7 @@ model.eval()
 model.float()
 model.to(device)
 
+model_old = copy.deepcopy(model)
 
 
 # for cnt,child in enumerate(model.children()):
@@ -130,6 +131,7 @@ cntw = 0
 loss_valid = []
 loss_train = []
 test_eval  = []
+test_eval_old = []
 
 for epoch in range(epochs):
 
@@ -222,6 +224,33 @@ with no_grad():
                          (labels[0,2].item()* tf_std)+ tf_mean,
                          (outputs_w[0][0].item()* tf_std)+ tf_mean]))
 
+model_old.eval()
+with no_grad():
+    for i, data in enumerate(test_loader, 0):
+        # inputs, labels = data[0], data[1]
+        inputs, labels = torch.tensor(data[0],dtype=torch.float32).to(device),torch.tensor(data[1],dtype=torch.float32).to(device)
+        outputs_x, outputs_y, outputs_w  = model_old(inputs)
+        writer.add_scalars("x", {
+            'test_label_x': (labels[0,0].item() * tf_std) + tf_mean,
+            'test_out_x': (outputs_x[0][0].item() * tf_std) + tf_mean,
+        }, cntw)
+        writer.add_scalars("y", {
+            'test_label_y': (labels[0,1].item() * tf_std) + tf_mean,
+            'test_out_y': (outputs_y[0][0].item() * tf_std) + tf_mean,
+        }, cntw)
+        writer.add_scalars("W", {
+            'test_label_w': (labels[0,2].item() * tf_std) + tf_mean,
+            'test_out_w': (outputs_w[0][0].item() * tf_std) + tf_mean,
+        }, cntw)
+        cntw = cntw + 1
+        writer.flush()
+        test_eval_old.append(np.array([(labels[0,0].item()* tf_std)+ tf_mean,
+                         (outputs_x[0][0].item()* tf_std)+ tf_mean,
+                         (labels[0,1].item()* tf_std)+ tf_mean,
+                         (outputs_y[0][0].item()* tf_std)+ tf_mean,
+                         (labels[0,2].item()* tf_std)+ tf_mean,
+                         (outputs_w[0][0].item()* tf_std)+ tf_mean]))
+
 
 torch.save(model.state_dict(), "model_xyw_fine.net")
 loss_train = np.asarray(loss_train)
@@ -231,6 +260,7 @@ test_eval  = np.asarray(test_eval)
 np.save("loss_train_fine_xyw",loss_train)
 np.save("loss_valid_fine_xyw",loss_valid)
 np.save("test_eval_fine_xyw",test_eval)
+np.save("test_eval_fine_old_xyw",test_eval_old)
 
 
 
