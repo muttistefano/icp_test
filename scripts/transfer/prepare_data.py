@@ -123,12 +123,12 @@ laser_files_6  = []
 # main_path_5 = "/home/kolmogorov/Documents/ROS/wimpy_destroyer/wimpy_ws_ros2/src/wimpy_acquire/logs/5/"
 # main_path_6 = "/home/kolmogorov/Documents/ROS/wimpy_destroyer/wimpy_ws_ros2/src/wimpy_acquire/logs/6/"
 
-main_path_1 = "/home/mutti/logs_icp/logs/1/"
-main_path_2 = "/home/mutti/logs_icp/logs/2/"
-main_path_3 = "/home/mutti/logs_icp/logs/3/"
-main_path_4 = "/home/mutti/logs_icp/logs/4/"
-main_path_5 = "/home/mutti/logs_icp/logs/5/"
-main_path_6 = "/home/mutti/logs_icp/logs/6/"
+main_path_1 = "/home/blanker/icp_test/log/pre_train/1/"
+main_path_2 = "/home/blanker/icp_test/log/pre_train/2/"
+main_path_3 = "/home/blanker/icp_test/log/pre_train/3/"
+main_path_4 = "/home/blanker/icp_test/log/pre_train/4/"
+main_path_5 = "/home/blanker/icp_test/log/pre_train/5/"
+main_path_6 = "/home/blanker/icp_test/log/pre_train/6/"
 
 for root, dirs, files in os.walk(main_path_1):
     for name in files:
@@ -239,8 +239,7 @@ tf_tot    = []
 for las,tf in zip([laser_array_1,laser_array_2,laser_array_3,laser_array_4,laser_array_5,laser_array_6],
                   [tf_array_1,tf_array_2,tf_array_3,tf_array_4,tf_array_5,tf_array_6] ):
     for cnt,(las_s,tf_s) in enumerate(zip(las,tf)):
-        rnd_idx_all = np.random.randint(max(0,cnt-20),min(len(las),cnt+20),size=(20))
-        # rnd_idx_all = np.random.randint(max(0,cnt-20),min(len(las),cnt+20),size=(1))
+        rnd_idx_all = np.random.randint(max(0,cnt-20),min(len(las),cnt+20),size=(30))
         rnd_idx = np.setdiff1d(rnd_idx_all,cnt)
         for elem in rnd_idx:
             laser_tot.append(np.concatenate((las_s,las[elem])))
@@ -256,19 +255,21 @@ print(tf_tot.nbytes * 1e-6)
 
 # print("lasers mean and std: " + str(laser_tot.mean()) + " " + str(laser_tot.std()))
 # print("tf     mean and std: " + str(tf_tot.mean())    + " " + str(tf_tot.std()))
-# laser_tot = (laser_tot - laser_tot.mean())/(laser_tot.std())
-# tf_tot      = (tf_tot - tf_tot.mean())/(tf_tot.std())
-tf_min_max = np.array([tf_tot[:,0].min(),tf_tot[:,0].max(),tf_tot[:,1].min(),tf_tot[:,1].max(),tf_tot[:,2].min(),tf_tot[:,2].max()])
-print("tf     min and max: " + str(tf_tot[:,0].min())    + " " + str(tf_tot[:,0].max()))
-print("tf     min and max: " + str(tf_tot[:,1].min())    + " " + str(tf_tot[:,1].max()))
-print("tf     min and max: " + str(tf_tot[:,2].min())    + " " + str(tf_tot[:,2].max()))
-tf_tot[:,0] = (tf_tot[:,0] - tf_tot[:,0].min()) / (tf_tot[:,0].max() - tf_tot[:,0].min())
-tf_tot[:,1] = (tf_tot[:,1] - tf_tot[:,1].min()) / (tf_tot[:,1].max() - tf_tot[:,1].min())
-tf_tot[:,2] = (tf_tot[:,2] - tf_tot[:,2].min()) / (tf_tot[:,2].max() - tf_tot[:,2].min())
+data_std_mean = np.array([laser_tot.mean(),laser_tot.std(),tf_tot.mean(),tf_tot.std()]) 
+laser_tot     = (laser_tot - laser_tot.mean())/(laser_tot.std())
+tf_tot        = (tf_tot    - tf_tot.mean())/(tf_tot.std())
 
-# print("laser max : " + str(laser_tot.max()))
-# laser_tot /= laser_tot.max()
-np.save("tf_min_max",tf_min_max)
+# tf_min_max = np.array([tf_tot[:,0].min(),tf_tot[:,0].max(),tf_tot[:,1].min(),tf_tot[:,1].max(),tf_tot[:,2].min(),tf_tot[:,2].max()])
+# print("tf     min and max: " + str(tf_tot[:,0].min())    + " " + str(tf_tot[:,0].max()))
+# print("tf     min and max: " + str(tf_tot[:,1].min())    + " " + str(tf_tot[:,1].max()))
+# print("tf     min and max: " + str(tf_tot[:,2].min())    + " " + str(tf_tot[:,2].max()))
+# tf_tot[:,0] = (tf_tot[:,0] - tf_tot[:,0].min()) / (tf_tot[:,0].max() - tf_tot[:,0].min())
+# tf_tot[:,1] = (tf_tot[:,1] - tf_tot[:,1].min()) / (tf_tot[:,1].max() - tf_tot[:,1].min())
+# tf_tot[:,2] = (tf_tot[:,2] - tf_tot[:,2].min()) / (tf_tot[:,2].max() - tf_tot[:,2].min())
+
+
+# np.save("tf_min_max",tf_min_max)
+np.save("data_std_mean",data_std_mean)
 np.save("laser",laser_tot)
 np.save("tf",tf_tot)
 

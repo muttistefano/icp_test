@@ -128,6 +128,7 @@ else:
 april_tf_1 = np.asarray(april_tf_1)
 
 #x-y tag rot 90°
+print(april_tf_1)
 april_tf_tmp = april_tf_1
 
 april_tf_1[:,0,3] = -1 * april_tf_tmp[:,1,3]
@@ -160,7 +161,7 @@ laser_tot = []
 tf_tot    = []
 
 for cnt,(las_s,tf_s) in enumerate(zip(ranges_data_array,april_tf_1)):
-    rnd_idx_all = np.random.randint(0,len(ranges_data_array),size=(20))
+    rnd_idx_all = np.random.randint(0,len(ranges_data_array),size=(30))
     rnd_idx = np.setdiff1d(rnd_idx_all,cnt)
     for elem in rnd_idx:
         laser_tot.append(np.concatenate((las_s,ranges_data_array[elem])))
@@ -178,17 +179,23 @@ print(tf_tot.nbytes * 1e-6)
 
 # tf_min_max = np.load("tf_min_max.npy")
 
-tf_min_max = np.array([tf_tot[:,0].min(),tf_tot[:,0].max(),tf_tot[:,1].min(),tf_tot[:,1].max(),tf_tot[:,2].min(),tf_tot[:,2].max()])
+data_std_mean = np.array([laser_tot.mean(),laser_tot.std(),tf_tot.mean(),tf_tot.std()]) 
+laser_tot     = (laser_tot - laser_tot.mean())/(laser_tot.std())
+tf_tot        = (tf_tot    - tf_tot.mean())/(tf_tot.std())
+
+
+# tf_min_max = np.array([tf_tot[:,0].min(),tf_tot[:,0].max(),tf_tot[:,1].min(),tf_tot[:,1].max(),tf_tot[:,2].min(),tf_tot[:,2].max()])
 # tf_tot[:,0] = (tf_tot[:,0] - tf_min_max[0]) / (tf_min_max[1] - tf_min_max[0])
 # tf_tot[:,1] = (tf_tot[:,1] - tf_min_max[2]) / (tf_min_max[3] - tf_min_max[2])
 # tf_tot[:,2] = (tf_tot[:,2] - tf_min_max[4]) / (tf_min_max[5] - tf_min_max[4])
-tf_tot[:,0] = (tf_tot[:,0] - tf_tot[:,0].min()) / (tf_tot[:,0].max() - tf_tot[:,0].min())
-tf_tot[:,1] = (tf_tot[:,1] - tf_tot[:,1].min()) / (tf_tot[:,1].max() - tf_tot[:,1].min())
-tf_tot[:,2] = (tf_tot[:,2] - tf_tot[:,2].min()) / (tf_tot[:,2].max() - tf_tot[:,2].min())
+# tf_tot[:,0] = (tf_tot[:,0] - tf_tot[:,0].min()) / (tf_tot[:,0].max() - tf_tot[:,0].min())
+# tf_tot[:,1] = (tf_tot[:,1] - tf_tot[:,1].min()) / (tf_tot[:,1].max() - tf_tot[:,1].min())
+# tf_tot[:,2] = (tf_tot[:,2] - tf_tot[:,2].min()) / (tf_tot[:,2].max() - tf_tot[:,2].min())
 
 # print("laser max : " + str(laser_tot.max()))
 # laser_tot /= laser_tot.max()
-np.save("tf_min_max_fine",tf_min_max)
+# np.save("tf_min_max_fine",tf_min_max)
+np.save("data_std_mean_fine",data_std_mean)
 np.save("laser_fine",laser_tot)
 np.save("tf_fine",tf_tot)
 

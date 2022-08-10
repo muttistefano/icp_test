@@ -38,8 +38,10 @@ print("DEvice: ",device)
 
 class CustomDataset(Dataset):
     def __init__(self, laser_in,tf_label_in, transform_in=None, target_transform_in=None):
-        self.laser              = torch.tensor(laser_in,dtype=torch.float32).to(device)
-        self.tf_label           = torch.tensor(tf_label_in,dtype=torch.float32).to(device)
+        # self.laser              = torch.tensor(laser_in,dtype=torch.float32)#.to(device)
+        # self.tf_label           = torch.tensor(tf_label_in,dtype=torch.float32)#.to(device)
+        self.laser              = laser_in
+        self.tf_label           = tf_label_in
         self.transform          = transform_in
         self.target_transform   = target_transform_in
         self.outputs            = []
@@ -55,17 +57,21 @@ class CustomDataset(Dataset):
 set_complete = CustomDataset(laser_array.astype(np.float32),tf_array)
 
 
-train_size = int(len(set_complete) * 0.75)
+train_size = int(len(set_complete) * 0.80)
 valid_size = int(len(set_complete) * 0.15)
 test_size  = len(set_complete)  - train_size - valid_size
 train_set, valid_set, test_set = random_split(set_complete, [train_size,valid_size,test_size ])
 
+# torch.multiprocessing.set_start_method('spawn')
+batch_size_train = 256
 
-batch_size_train = 1024
+train_loader = DataLoader(train_set,  batch_size=batch_size_train ,shuffle=True, num_workers=4,pin_memory=True,persistent_workers=True)
+valid_loader = DataLoader(valid_set , batch_size=batch_size_train ,shuffle=True, num_workers=4,pin_memory=True,persistent_workers=True)
+test_loader  = DataLoader(test_set ,  batch_size=1                ,shuffle=True, num_workers=1,pin_memory=True,persistent_workers=True)
 
-train_loader = DataLoader(train_set,  batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-valid_loader = DataLoader(valid_set , batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
-test_loader  = DataLoader(test_set ,  batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+# train_loader = DataLoader(train_set,  batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+# valid_loader = DataLoader(valid_set , batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
+# test_loader  = DataLoader(test_set ,  batch_size=batch_size_train ,shuffle=True, num_workers=0,pin_memory=False,persistent_workers=False)
 
 
 class RNN(nn.Module):
@@ -73,7 +79,7 @@ class RNN(nn.Module):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.rnn   = nn.RNN(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
+        self.rnn   = nn.GRU(input_size=510,hidden_size=hidden_size,num_layers=num_layers,batch_first=True,dropout=0.0)
         self.fcx   = nn.Linear(in_features=hidden_size,out_features=fd_n)
         self.fcx1  = nn.Linear(in_features=fd_n,out_features=fd_e)
         self.fcx2  = nn.Linear(in_features=fd_e,out_features=1)
@@ -100,7 +106,7 @@ class RNN(nn.Module):
         return outx,outy,outw
 
 
-model = RNN(150,3,120,30)
+model = RNN(150,4,150,50)
 
 model.float()
 model.to(device)
@@ -110,7 +116,7 @@ criterion_y = torch.nn.MSELoss()
 criterion_w = torch.nn.MSELoss()
 
 
-optimizer = torch.optim.AdamW(model.parameters(),lr=0.00002)
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.00001)
 # optimizer = torch.optim.SGD(model.parameters(),lr=0.005)
 epochs    = 3000
 cntw = 0
@@ -124,7 +130,8 @@ for epoch in range(epochs):
     running_loss_valid = 0.0
     model.train()
     for i, data in enumerate(train_loader):
-        inputs, labels = data[0], data[1]
+        # inputs, labels = data[0], data[1]
+        inputs, labels = torch.tensor(data[0],dtype=torch.float32).to(device),torch.tensor(data[1],dtype=torch.float32).to(device)
         outputs_x, outputs_y, outputs_w  = model(inputs)
         out  = torch.cat((outputs_x, outputs_y, outputs_w ),dim=1)
         loss = criterion_x(out,labels)
@@ -144,7 +151,8 @@ for epoch in range(epochs):
     model.eval()
     with no_grad():
         for i, data in enumerate(valid_loader, 0):
-            inputs, labels = data[0], data[1]
+            # inputs, labels = data[0], data[1]
+            inputs, labels = torch.tensor(data[0],dtype=torch.float32).to(device),torch.tensor(data[1],dtype=torch.float32).to(device)
             outputs_x, outputs_y, outputs_w  = model(inputs)
             out  = torch.cat((outputs_x, outputs_y, outputs_w ),dim=1)
             loss = criterion_x(out,labels)
@@ -172,29 +180,39 @@ for epoch in range(epochs):
         writer.flush()
 
 test_eval = []
+data_std_mean = np.load("data_std_mean.npy")
+
+tf_mean = data_std_mean[2]
+tf_std  = data_std_mean[3]
 
 model.eval()
 with no_grad():
     for i, data in enumerate(test_loader, 0):
-        inputs, labels = data[0], data[1]
+        # inputs, labels = data[0], data[1]
+        inputs, labels = torch.tensor(data[0],dtype=torch.float32).to(device),torch.tensor(data[1],dtype=torch.float32).to(device)
         outputs_x, outputs_y, outputs_w  = model(inputs)
         writer.add_scalars("x", {
-            'test_label_x': labels[0,0].item(),
-            'test_out_x': outputs_x[0][0].item(),
+            'test_label_x': (labels[0,0].item() * tf_std) + tf_mean,
+            'test_out_x': (outputs_x[0][0].item() * tf_std) + tf_mean,
         }, cntw)
         writer.add_scalars("y", {
-            'test_label_y': labels[0,1].item(),
-            'test_out_y': outputs_y[0][0].item(),
+            'test_label_y': (labels[0,1].item() * tf_std) + tf_mean,
+            'test_out_y': (outputs_y[0][0].item() * tf_std) + tf_mean,
         }, cntw)
         writer.add_scalars("W", {
-            'test_label_w': labels[0,2].item(),
-            'test_out_w': outputs_w[0][0].item(),
+            'test_label_w': (labels[0,2].item() * tf_std) + tf_mean,
+            'test_out_w': (outputs_w[0][0].item() * tf_std) + tf_mean,
         }, cntw)
         cntw = cntw + 1
         writer.flush()
-        test_eval.append(np.array([labels[0,0].item(),outputs_x[0][0].item(),labels[0,1].item(),outputs_y[0][0].item(),labels[0,2].item(),outputs_w[0][0].item()]))
+        test_eval.append(np.array([(labels[0,0].item()* tf_std)+ tf_mean,
+                         (outputs_x[0][0].item()* tf_std)+ tf_mean,
+                         (labels[0,1].item()* tf_std)+ tf_mean,
+                         (outputs_y[0][0].item()* tf_std)+ tf_mean,
+                         (labels[0,2].item()* tf_std)+ tf_mean,
+                         (outputs_w[0][0].item()* tf_std)+ tf_mean]))
 
-# np.save("out/gru_l1_adamw_00002_1500_loss.net",np.asarray(loss_valid))
+
 torch.save(model.state_dict(), "model_xyw.net")
 loss_train = np.asarray(loss_train)
 loss_valid = np.asarray(loss_valid)
